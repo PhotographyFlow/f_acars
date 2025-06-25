@@ -10,4 +10,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get helloWorld => '你好世界！';
+
+  @override
+  String get home => '主页';
+
+  @override
+  String get settings => '设置';
 }

@@ -85,7 +85,7 @@ class _SettingsPageState extends State<SettingsPage> {
     FluentThemeData(brightness: Brightness.dark, accentColor: Colors.blue);
 
     return ScaffoldPage.scrollable(
-      header: const PageHeader(title: Text('Settings')),
+      header: PageHeader(title: Text(AppLocalizations.of(context)!.settings)),
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,

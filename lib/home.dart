@@ -27,7 +27,7 @@ class HomePage extends StatelessWidget {
         accentColor: Colors.blue,
       ),
       child: ScaffoldPage.scrollable(
-        header: const PageHeader(title: Text('Home')),
+        header: PageHeader(title: Text(AppLocalizations.of(context)!.home)),
         children: [
           Builder(
             builder: (context) {

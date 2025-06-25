@@ -1,3 +1,15 @@
-{
-    "helloWorld": "你好世界！"
+{   
+    "@@locale": "zh",
+    "helloWorld": "你好世界！",
+    
+    "home": "主页",
+    "@home": {
+        "description": "主页标题"
+    },
+    
+    "settings": "设置",
+    "@settings": {
+      "description": "设置页面标题"
+    }
+
 }
