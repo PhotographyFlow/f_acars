@@ -10,10 +10,10 @@ class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.onLocaleChanged});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  State<SettingsPage> createState() => SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class SettingsPageState extends State<SettingsPage> {
   final apiKeyController = TextEditingController();
   String? validationError = '';
   final _storage = FlutterSecureStorage();
@@ -27,18 +27,6 @@ class _SettingsPageState extends State<SettingsPage> {
       _validateApiKey(apiKeyController.text);
     });
   }
-
-  /*Future<void> _loadApiKey() async {
-    final apiKey = await _storage.read(key: 'apiKey');
-    if (apiKey != null) {
-      apiKeyController.text = apiKey;
-    }
-  }
-
-  Future<void> _saveApiKey() async {
-    await _storage.write(key: 'apiKey', value: apiKeyController.text);
-  }
-*/ //old method
 
   Future<void> _loadSettings() async {
     final settings = await _storage.read(key: 'settings');
@@ -66,7 +54,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _validateApiKey(String text) {
     if (text.length != 20) {
-      setState(() => validationError = 'Ensure enter the right api key.');
+      setState(
+        () => validationError = AppLocalizations.of(context)!.apiKeyWrong,
+      );
     } else {
       setState(() => validationError = null);
     }
@@ -80,6 +70,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  //Settings page
   @override
   Widget build(BuildContext context) {
     FluentThemeData(brightness: Brightness.dark, accentColor: Colors.blue);
@@ -90,7 +81,7 @@ class _SettingsPageState extends State<SettingsPage> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Your api key (don't share this!)"),
+            Text(AppLocalizations.of(context)!.yourApiKey),
             SizedBox(height: 10),
             PasswordFormBox(
               controller: apiKeyController,
@@ -107,7 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           _saveSettings();
                         }
                       : null,
-                  child: Text("Submmit"),
+                  child: Text(AppLocalizations.of(context)!.deleteApiKey),
                 ),
                 SizedBox(width: 10),
                 Button(
@@ -122,12 +113,12 @@ class _SettingsPageState extends State<SettingsPage> {
                       validationError = '';
                     });
                   },
-                  child: Text("Delete API Key"),
+                  child: Text(AppLocalizations.of(context)!.deleteApiKey),
                 ),
               ],
             ),
             SizedBox(height: 10),
-            Text("Language"),
+            Text(AppLocalizations.of(context)!.language),
             SizedBox(height: 10),
             ComboBox(
               value: _selectedLocale,

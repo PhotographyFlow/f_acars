@@ -16,4 +16,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings => 'Settings';
+
+  @override
+  String get yourApiKey => 'Your api key (don\'t share this!)';
+
+  @override
+  String get apiKeyWrong => 'Ensure enter the right api key.';
+
+  @override
+  String get deleteApiKey => 'Delete API Key';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get language => 'Language';
 }

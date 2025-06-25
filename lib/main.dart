@@ -1,9 +1,10 @@
 import 'package:f_acars/l10n/app_localizations.dart';
+import 'package:f_acars/navigation.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
 import 'l10n/l10n.dart';
-import 'settings.dart';
-import 'home.dart';
 
 void main() => runApp(const MyApp());
 
@@ -17,6 +18,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   int index = 0;
   Locale? _selectedLocale;
+  final apiKeyController = TextEditingController();
+  final _storage = FlutterSecureStorage();
   void onLocaleChanged(Locale locale) {
     setState(() {
       _selectedLocale = locale;
@@ -24,6 +27,23 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadLang(); // Load settings on launch
+  }
+
+  Future<void> _loadLang() async {
+    final settings = await _storage.read(key: 'settings');
+    if (settings != null) {
+      final jsonSettings = jsonDecode(settings);
+      final localeCode = jsonSettings['locale'];
+      if (localeCode != null) {
+        _selectedLocale = Locale(localeCode);
+        onLocaleChanged(_selectedLocale!);
+      }
+    }
+  }
+
   Widget build(BuildContext context) {
     return FluentApp(
       locale: _selectedLocale,
@@ -39,32 +59,7 @@ class _MyAppState extends State<MyApp> {
         brightness: Brightness.dark,
         accentColor: Colors.blue,
       ),
-      home: NavigationView(
-        appBar: NavigationAppBar(),
-        pane: NavigationPane(
-          size: NavigationPaneSize(openWidth: 200),
-          selected: index,
-          onChanged: (newIndex) {
-            setState(() {
-              index = newIndex;
-              _selectedLocale = _selectedLocale;
-            });
-          },
-          displayMode: PaneDisplayMode.auto,
-          items: [
-            PaneItem(
-              icon: Icon(FluentIcons.home),
-              body: HomePage(),
-              title: Text("Home"),
-            ),
-            PaneItem(
-              icon: Icon(FluentIcons.settings),
-              body: SettingsPage(onLocaleChanged: onLocaleChanged),
-              title: Text("Settings"),
-            ),
-          ],
-        ),
-      ),
+      home: Navigation(onLocaleChanged: onLocaleChanged),
     );
   }
 }

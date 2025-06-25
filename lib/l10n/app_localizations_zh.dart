@@ -16,4 +16,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings => '设置';
+
+  @override
+  String get yourApiKey => '您的API密钥（不要分享给别人！）';
+
+  @override
+  String get apiKeyWrong => '确保输入正确的API密钥。';
+
+  @override
+  String get deleteApiKey => ' 删除API密钥';
+
+  @override
+  String get submit => '提交';
+
+  @override
+  String get language => '语言';
 }

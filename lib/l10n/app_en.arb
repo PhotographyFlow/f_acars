@@ -1,5 +1,6 @@
 { 
   "@@locale": "en",
+
   "helloWorld": "Hello World!",
   "@helloWorld": {
     "description": "The conventional newborn programmer greeting"
@@ -13,5 +14,30 @@
   "settings": "Settings",
   "@settings": {
     "description": "Settings page title"
+  },
+
+  "yourApiKey": "Your api key (don't share this!)",
+  "@yourApiKey": {
+    "description": "API Key input box at settings page"
+  },
+
+  "apiKeyWrong": "Ensure enter the right api key.",
+  "@apiKeyWrong": {
+    "description": "Wrong api key message at settings page"
+  },
+
+  "deleteApiKey": "Delete API Key",
+  "@deleteApiKey": {
+    "description": "Delete API key button at settings page"
+  },
+
+  "submit": "Submit",
+  "@submit": {
+    "description": "Submit button"
+  },
+
+  "language": "Language",
+  "@language": {
+    "description": "Language setting"
   }
 }
