@@ -1,15 +1,43 @@
-{   
-    "@@locale": "zh",
-    "helloWorld": "你好世界！",
-    
-    "home": "主页",
-    "@home": {
-        "description": "主页标题"
-    },
-    
-    "settings": "设置",
-    "@settings": {
-      "description": "设置页面标题"
-    }
+{ 
+  "@@locale": "zh",
 
+  "helloWorld": "你好世界！",
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting"
+  },
+  
+  "home": "主页",
+  "@home": {
+    "description": "Home page title"
+  },
+  
+  "settings": "设置",
+  "@settings": {
+    "description": "Settings page title"
+  },
+
+  "yourApiKey": "您的API密钥（不要分享给别人！）",
+  "@yourApiKey": {
+    "description": "API Key input box at settings page"
+  },
+
+  "apiKeyWrong": "确保输入正确的API密钥。",
+  "@apiKeyWrong": {
+    "description": "Wrong api key message at settings page"
+  },
+
+  "deleteApiKey": " 删除API密钥",
+  "@deleteApiKey": {
+    "description": "Delete API key button at settings page"
+  },
+
+  "submit": "提交",
+  "@submit": {
+    "description": "Submit button"
+  },
+
+  "language": "语言",
+  "@language": {
+    "description": "Language setting"
+  }
 }

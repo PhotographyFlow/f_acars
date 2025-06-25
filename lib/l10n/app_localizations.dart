@@ -112,6 +112,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
+
+  /// API Key input box at settings page
+  ///
+  /// In en, this message translates to:
+  /// **'Your api key (don\'t share this!)'**
+  String get yourApiKey;
+
+  /// Wrong api key message at settings page
+  ///
+  /// In en, this message translates to:
+  /// **'Ensure enter the right api key.'**
+  String get apiKeyWrong;
+
+  /// Delete API key button at settings page
+  ///
+  /// In en, this message translates to:
+  /// **'Delete API Key'**
+  String get deleteApiKey;
+
+  /// Submit button
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
+
+  /// Language setting
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
