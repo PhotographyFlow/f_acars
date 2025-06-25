@@ -1,6 +1,6 @@
 # f_acars
 
-A new Flutter project.
+A free ACARS for phpvms, powered by flutter.
 
 ## Getting Started
 
