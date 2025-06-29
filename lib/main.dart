@@ -44,6 +44,7 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return FluentApp(
       locale: _selectedLocale,

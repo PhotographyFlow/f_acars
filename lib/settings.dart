@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'package:f_acars/l10n/app_localizations.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'l10n/locale_names.dart';
 import 'dart:convert';
+import 'package:http/http.dart';
 
 class SettingsPage extends StatefulWidget {
   final Function(Locale) onLocaleChanged;
@@ -15,23 +18,48 @@ class SettingsPage extends StatefulWidget {
 
 class SettingsPageState extends State<SettingsPage> {
   final apiKeyController = TextEditingController();
-  String? validationError = '';
+  final vaUrlController = TextEditingController();
+  String? apiKeyValidationError = '';
+  String? vaUrlValidationError = '';
+  Text? testConnnectionError;
+  bool _isTesting = false;
   final _storage = FlutterSecureStorage();
+  Timer? _timer;
+  AnimationController? _animationController;
+  Future? _testFuture;
 
   @override
   void initState() {
     super.initState();
     _selectedLocale = Locale('en');
+    vaUrlController.text = 'https://vms.example.com';
     _loadSettings();
+    vaUrlController.addListener(() {
+      _validateVaUrl(vaUrlController.text);
+    });
     apiKeyController.addListener(() {
       _validateApiKey(apiKeyController.text);
     });
+
+    _timer?.cancel();
+    _animationController?.removeListener(() {});
+    _animationController?.dispose();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _animationController?.removeListener(() {});
+    _animationController?.dispose();
+    _testFuture?.then((_) => null).catchError((_) => null);
+    super.dispose();
   }
 
   Future<void> _loadSettings() async {
     final settings = await _storage.read(key: 'settings');
     if (settings != null) {
       final jsonSettings = jsonDecode(settings);
+      vaUrlController.text = jsonSettings['vaUrl'];
       apiKeyController.text = jsonSettings['apiKey'];
       final localeCode = jsonSettings['locale'];
       if (localeCode != null) {
@@ -41,24 +69,36 @@ class SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<void> _saveSettings() async {
-    final settings = {
-      'apiKey': apiKeyController.text,
-      'locale': _selectedLocale?.languageCode,
-      // Add more settings as needed, for example:
-      // 'locale': localeController.text,
-      // 'theme': themeController.text,
-    };
-    await _storage.write(key: 'settings', value: jsonEncode(settings));
+  Future<void> _saveSettings(String key, dynamic value) async {
+    final settings = await _storage.read(key: 'settings');
+    if (settings != null) {
+      final jsonSettings = jsonDecode(settings);
+      jsonSettings[key] = value;
+      await _storage.write(key: 'settings', value: jsonEncode(jsonSettings));
+    } else {
+      await _storage.write(key: 'settings', value: jsonEncode({key: value}));
+    }
   }
 
   void _validateApiKey(String text) {
     if (text.length != 20) {
       setState(
-        () => validationError = AppLocalizations.of(context)!.apiKeyWrong,
+        () => apiKeyValidationError = AppLocalizations.of(context)!.apiKeyWrong,
       );
     } else {
-      setState(() => validationError = null);
+      setState(() => apiKeyValidationError = null);
+    }
+  }
+
+  void _validateVaUrl(String text) {
+    setState(() => vaUrlValidationError = null);
+    try {
+      final uri = Uri.parse(text);
+      if (uri.scheme.isEmpty || uri.host.isEmpty) {
+        setState(() => vaUrlValidationError = 'invalid url');
+      }
+    } on FormatException {
+      setState(() => vaUrlValidationError = 'invalid url');
     }
   }
 
@@ -67,6 +107,76 @@ class SettingsPageState extends State<SettingsPage> {
   void _changeLocale(Locale? locale) {
     if (locale != null) {
       widget.onLocaleChanged.call(locale);
+    }
+  }
+
+  Future _testConnection() async {
+    try {
+      final response = await get(
+        Uri.parse('${vaUrlController.text}/api/user'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': apiKeyController.text,
+        },
+      );
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        final responseData = responseBody['data'];
+        if (kDebugMode) {
+          print(responseData);
+        }
+        if (responseData.containsKey('id') &&
+            responseData.containsKey('pilot_id') &&
+            responseData.containsKey('ident')) {
+          setState(
+            () => testConnnectionError = Text(
+              '\u2713 OK',
+              style: TextStyle(color: Colors.green),
+            ),
+          );
+        } else {
+          setState(
+            () => testConnnectionError = Text(
+              '\u2717 ERROR, check your VA URL',
+              style: TextStyle(color: Colors.red),
+            ),
+          );
+        }
+      }
+      if (response.statusCode == 401) {
+        setState(
+          () => testConnnectionError = Text(
+            '\u2717 ERROR 401 Unauthorized, check your API key and VA URL',
+            style: TextStyle(color: Colors.red),
+          ),
+        );
+      }
+      if (response.statusCode == 404) {
+        setState(
+          () => testConnnectionError = Text(
+            '\u2717 ERROR 404 Not Found, check your VA URL',
+            style: TextStyle(color: Colors.red),
+          ),
+        );
+      }
+      if (response.statusCode == 400) {
+        setState(
+          () => testConnnectionError = Text(
+            '\u2717 ERROR 400 Validation Errors, contact developer',
+            style: TextStyle(color: Colors.red),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(
+        () => testConnnectionError = Text(
+          '\u2717 ERROR, check your internet connection or VA URL',
+          style: TextStyle(color: Colors.red),
+        ),
+      );
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 
@@ -81,26 +191,75 @@ class SettingsPageState extends State<SettingsPage> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            //VA URL input box
+            SizedBox(height: 10),
+            Text("VA URL (without'/' on end)"),
+            SizedBox(height: 10),
+            PasswordFormBox(
+              controller: vaUrlController,
+              revealMode: PasswordRevealMode.visible,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              placeholder: 'https://vms.example.com',
+              validator: (text) => vaUrlValidationError,
+            ),
+            SizedBox(height: 10),
+            //Save VA URL button
+            Row(
+              children: [
+                Button(
+                  onPressed: vaUrlValidationError == null
+                      ? () {
+                          _saveSettings(
+                            'vaUrl',
+                            vaUrlController.text,
+                          ).then((_) {});
+                        }
+                      : null,
+                  child: Text("Submit"),
+                ),
+                SizedBox(width: 10),
+                //clear VA URL button
+                Button(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(Colors.red),
+                  ),
+                  onPressed: () async {
+                    await _storage.delete(key: 'vaUrl');
+                    vaUrlController.clear();
+                    await _saveSettings('vaUrl', vaUrlController.text);
+                    setState(() {
+                      vaUrlValidationError = '';
+                    });
+                  },
+                  child: Text("Clear"),
+                ),
+              ],
+            ),
+
+            //Api key input box
+            SizedBox(height: 10),
             Text(AppLocalizations.of(context)!.yourApiKey),
             SizedBox(height: 10),
             PasswordFormBox(
               controller: apiKeyController,
               revealMode: PasswordRevealMode.peekAlways,
-              autovalidateMode: AutovalidateMode.always,
-              validator: (text) => validationError,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (text) => apiKeyValidationError,
             ),
             SizedBox(height: 10),
             Row(
               children: [
+                //Save api key button
                 Button(
-                  onPressed: validationError == null
+                  onPressed: apiKeyValidationError == null
                       ? () {
-                          _saveSettings();
+                          _saveSettings('apiKey', apiKeyController.text);
                         }
                       : null,
-                  child: Text(AppLocalizations.of(context)!.deleteApiKey),
+                  child: Text(AppLocalizations.of(context)!.submit),
                 ),
                 SizedBox(width: 10),
+                //clear api key button
                 Button(
                   style: ButtonStyle(
                     backgroundColor: WidgetStateProperty.all(Colors.red),
@@ -108,9 +267,9 @@ class SettingsPageState extends State<SettingsPage> {
                   onPressed: () async {
                     await _storage.delete(key: 'apiKey');
                     apiKeyController.clear();
-                    await _saveSettings();
+                    await _saveSettings('apiKey', apiKeyController.text);
                     setState(() {
-                      validationError = '';
+                      apiKeyValidationError = '';
                     });
                   },
                   child: Text(AppLocalizations.of(context)!.deleteApiKey),
@@ -118,15 +277,59 @@ class SettingsPageState extends State<SettingsPage> {
               ],
             ),
             SizedBox(height: 10),
+            Text("Test connection"),
+            SizedBox(height: 10),
+            Row(
+              children: [
+                Button(
+                  onPressed: () {
+                    if (!_isTesting) {
+                      setState(() {
+                        _isTesting = true;
+                      });
+                      _testFuture = _testConnection().then((_) {
+                        setState(() {
+                          _isTesting = false;
+                        });
+                      });
+                    }
+                  },
+                  child: Text("Test"),
+                ),
+                SizedBox(width: 10),
+                _isTesting
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: ProgressRing(
+                          strokeWidth: 3,
+                          backgroundColor: Colors.grey,
+                        ),
+                      )
+                    : SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: ProgressRing(
+                          strokeWidth: 3,
+                          value: 0,
+                          backgroundColor: Colors.grey,
+                        ),
+                      ),
+                SizedBox(width: 10),
+                testConnnectionError ?? Text(''),
+              ],
+            ),
+            SizedBox(height: 10),
             Text(AppLocalizations.of(context)!.language),
             SizedBox(height: 10),
+            //select language combo box
             ComboBox(
               value: _selectedLocale,
               onChanged: (Locale? locale) {
                 setState(() {
                   _selectedLocale = locale;
                   _changeLocale(locale!);
-                  _saveSettings();
+                  _saveSettings('locale', locale.languageCode);
                 });
               },
               items: AppLocalizations.supportedLocales
