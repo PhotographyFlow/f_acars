@@ -26,14 +26,69 @@
     "description": "Wrong api key message at settings page"
   },
 
-  "deleteApiKey": " 删除API密钥",
-  "@deleteApiKey": {
-    "description": "Delete API key button at settings page"
+  "yourVaUrl": "您的 VA 链接（不要在末尾添加'/'）",
+  "@yourVaUrl": {
+    "description": "VA URL input box at settings page"
+  },
+
+  "invalidUrl": "无效的链接",
+  "@invalidUrl": {
+    "description": "Invalid VA URL message at settings page"
+  },
+
+  "delete": " 删除",
+  "@delete": {
+    "description": "Delete button"
   },
 
   "submit": "提交",
   "@submit": {
     "description": "Submit button"
+  },
+
+  "save": "保存",
+  "@save": {
+    "description": "Save button"
+  },
+
+  "testConnection": "连接测试",
+  "@testConnection": {
+    "description": "Test connection in settings page"
+  },
+
+  "test": "测试",
+  "@test": {
+    "description": "Test button"
+  },
+
+  "testOK": "\u2713 成功",
+  "@testOK": {
+    "description": "Test OK message"
+  },
+
+  "eCheckVA": "\u2717 失败，检查您的 VA 链接",
+  "@eCheckVA": {
+    "description": "test connection error"
+  },
+
+  "e401": "\u2717 错误 401 未授权, 检查您的 API 密钥和 VA 链接",
+  "@e401": {
+    "description": "test connection error"
+  },
+
+  "e404": "\u2717 错误 404 请求不存在, 检查您的 VA 链接",
+  "@e404": {
+    "description": "test connection error"
+  },
+
+  "e400": "\u2717 错误 400 验证错误, 联系开发者",
+  "@e400": {
+    "description": "test connection error"
+  },
+
+  "eInternet": "\u2717 失败, 检查您的网络连接",
+  "@eInternet": {
+    "description": "test connection error"
   },
 
   "language": "语言",

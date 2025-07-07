@@ -94,11 +94,15 @@ class SettingsPageState extends State<SettingsPage> {
     setState(() => vaUrlValidationError = null);
     try {
       final uri = Uri.parse(text);
-      if (uri.scheme.isEmpty || uri.host.isEmpty) {
-        setState(() => vaUrlValidationError = 'invalid url');
+      if (uri.scheme.isEmpty || uri.host.isEmpty || uri.path.endsWith('/')) {
+        setState(
+          () => vaUrlValidationError = AppLocalizations.of(context)!.invalidUrl,
+        );
       }
     } on FormatException {
-      setState(() => vaUrlValidationError = 'invalid url');
+      setState(
+        () => vaUrlValidationError = AppLocalizations.of(context)!.invalidUrl,
+      );
     }
   }
 
@@ -130,15 +134,15 @@ class SettingsPageState extends State<SettingsPage> {
             responseData.containsKey('ident')) {
           setState(
             () => testConnnectionError = Text(
-              '\u2713 OK',
-              style: TextStyle(color: Colors.green),
+              AppLocalizations.of(context)!.testOK,
+              style: TextStyle(color: Colors.successPrimaryColor),
             ),
           );
         } else {
           setState(
             () => testConnnectionError = Text(
-              '\u2717 ERROR, check your VA URL',
-              style: TextStyle(color: Colors.red),
+              AppLocalizations.of(context)!.eCheckVA,
+              style: TextStyle(color: Colors.errorPrimaryColor),
             ),
           );
         }
@@ -146,32 +150,32 @@ class SettingsPageState extends State<SettingsPage> {
       if (response.statusCode == 401) {
         setState(
           () => testConnnectionError = Text(
-            '\u2717 ERROR 401 Unauthorized, check your API key and VA URL',
-            style: TextStyle(color: Colors.red),
+            AppLocalizations.of(context)!.e401,
+            style: TextStyle(color: Colors.errorPrimaryColor),
           ),
         );
       }
       if (response.statusCode == 404) {
         setState(
           () => testConnnectionError = Text(
-            '\u2717 ERROR 404 Not Found, check your VA URL',
-            style: TextStyle(color: Colors.red),
+            AppLocalizations.of(context)!.e404,
+            style: TextStyle(color: Colors.errorPrimaryColor),
           ),
         );
       }
       if (response.statusCode == 400) {
         setState(
           () => testConnnectionError = Text(
-            '\u2717 ERROR 400 Validation Errors, contact developer',
-            style: TextStyle(color: Colors.red),
+            AppLocalizations.of(context)!.e400,
+            style: TextStyle(color: Colors.errorPrimaryColor),
           ),
         );
       }
     } catch (e) {
       setState(
         () => testConnnectionError = Text(
-          '\u2717 ERROR, check your internet connection or VA URL',
-          style: TextStyle(color: Colors.red),
+          AppLocalizations.of(context)!.eInternet,
+          style: TextStyle(color: Colors.errorPrimaryColor),
         ),
       );
       if (kDebugMode) {
@@ -193,7 +197,7 @@ class SettingsPageState extends State<SettingsPage> {
           children: [
             //VA URL input box
             SizedBox(height: 10),
-            Text("VA URL (without'/' on end)"),
+            Text(AppLocalizations.of(context)!.yourVaUrl),
             SizedBox(height: 10),
             PasswordFormBox(
               controller: vaUrlController,
@@ -215,7 +219,7 @@ class SettingsPageState extends State<SettingsPage> {
                           ).then((_) {});
                         }
                       : null,
-                  child: Text("Submit"),
+                  child: Text(AppLocalizations.of(context)!.save),
                 ),
                 SizedBox(width: 10),
                 //clear VA URL button
@@ -231,13 +235,13 @@ class SettingsPageState extends State<SettingsPage> {
                       vaUrlValidationError = '';
                     });
                   },
-                  child: Text("Clear"),
+                  child: Text(AppLocalizations.of(context)!.delete),
                 ),
               ],
             ),
 
             //Api key input box
-            SizedBox(height: 10),
+            SizedBox(height: 20),
             Text(AppLocalizations.of(context)!.yourApiKey),
             SizedBox(height: 10),
             PasswordFormBox(
@@ -256,7 +260,7 @@ class SettingsPageState extends State<SettingsPage> {
                           _saveSettings('apiKey', apiKeyController.text);
                         }
                       : null,
-                  child: Text(AppLocalizations.of(context)!.submit),
+                  child: Text(AppLocalizations.of(context)!.save),
                 ),
                 SizedBox(width: 10),
                 //clear api key button
@@ -272,12 +276,14 @@ class SettingsPageState extends State<SettingsPage> {
                       apiKeyValidationError = '';
                     });
                   },
-                  child: Text(AppLocalizations.of(context)!.deleteApiKey),
+                  child: Text(AppLocalizations.of(context)!.delete),
                 ),
               ],
             ),
-            SizedBox(height: 10),
-            Text("Test connection"),
+
+            //test connection
+            SizedBox(height: 20),
+            Text(AppLocalizations.of(context)!.testConnection),
             SizedBox(height: 10),
             Row(
               children: [
@@ -294,7 +300,7 @@ class SettingsPageState extends State<SettingsPage> {
                       });
                     }
                   },
-                  child: Text("Test"),
+                  child: Text(AppLocalizations.of(context)!.test),
                 ),
                 SizedBox(width: 10),
                 _isTesting
@@ -319,7 +325,9 @@ class SettingsPageState extends State<SettingsPage> {
                 testConnnectionError ?? Text(''),
               ],
             ),
-            SizedBox(height: 10),
+
+            //select language
+            SizedBox(height: 20),
             Text(AppLocalizations.of(context)!.language),
             SizedBox(height: 10),
             //select language combo box

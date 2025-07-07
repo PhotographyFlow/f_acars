@@ -24,10 +24,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get apiKeyWrong => '确保输入正确的API密钥。';
 
   @override
-  String get deleteApiKey => ' 删除API密钥';
+  String get yourVaUrl => '您的 VA 链接（不要在末尾添加\'/\'）';
+
+  @override
+  String get invalidUrl => '无效的链接';
+
+  @override
+  String get delete => ' 删除';
 
   @override
   String get submit => '提交';
+
+  @override
+  String get save => '保存';
+
+  @override
+  String get testConnection => '连接测试';
+
+  @override
+  String get test => '测试';
+
+  @override
+  String get testOK => '✓ 成功';
+
+  @override
+  String get eCheckVA => '✗ 失败，检查您的 VA 链接';
+
+  @override
+  String get e401 => '✗ 错误 401 未授权, 检查您的 API 密钥和 VA 链接';
+
+  @override
+  String get e404 => '✗ 错误 404 请求不存在, 检查您的 VA 链接';
+
+  @override
+  String get e400 => '✗ 错误 400 验证错误, 联系开发者';
+
+  @override
+  String get eInternet => '✗ 失败, 检查您的网络连接';
 
   @override
   String get language => '语言';
