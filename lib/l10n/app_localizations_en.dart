@@ -24,10 +24,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get apiKeyWrong => 'Ensure enter the right api key.';
 
   @override
-  String get deleteApiKey => 'Delete API Key';
+  String get yourVaUrl => 'Your VA URL (without\'/\' on end)';
+
+  @override
+  String get invalidUrl => 'invalid url';
+
+  @override
+  String get delete => 'Delete';
 
   @override
   String get submit => 'Submit';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get testConnection => 'Test connection';
+
+  @override
+  String get test => 'Test';
+
+  @override
+  String get testOK => '✓ OK';
+
+  @override
+  String get eCheckVA => '✗ ERROR, check your VA URL';
+
+  @override
+  String get e401 => '✗ ERROR 401 Unauthorized, check your API key and VA URL';
+
+  @override
+  String get e404 => '✗ ERROR 404 Not Found, check your VA URL';
+
+  @override
+  String get e400 => '✗ ERROR 400 Validation Errors, contact developer';
+
+  @override
+  String get eInternet => '✗ ERROR, check your internet connection';
 
   @override
   String get language => 'Language';

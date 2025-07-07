@@ -125,17 +125,83 @@ abstract class AppLocalizations {
   /// **'Ensure enter the right api key.'**
   String get apiKeyWrong;
 
-  /// Delete API key button at settings page
+  /// VA URL input box at settings page
   ///
   /// In en, this message translates to:
-  /// **'Delete API Key'**
-  String get deleteApiKey;
+  /// **'Your VA URL (without\'/\' on end)'**
+  String get yourVaUrl;
+
+  /// Invalid VA URL message at settings page
+  ///
+  /// In en, this message translates to:
+  /// **'invalid url'**
+  String get invalidUrl;
+
+  /// Delete button
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
 
   /// Submit button
   ///
   /// In en, this message translates to:
   /// **'Submit'**
   String get submit;
+
+  /// Save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// Test connection in settings page
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection'**
+  String get testConnection;
+
+  /// Test button
+  ///
+  /// In en, this message translates to:
+  /// **'Test'**
+  String get test;
+
+  /// Test OK message
+  ///
+  /// In en, this message translates to:
+  /// **'✓ OK'**
+  String get testOK;
+
+  /// test connection error
+  ///
+  /// In en, this message translates to:
+  /// **'✗ ERROR, check your VA URL'**
+  String get eCheckVA;
+
+  /// test connection error
+  ///
+  /// In en, this message translates to:
+  /// **'✗ ERROR 401 Unauthorized, check your API key and VA URL'**
+  String get e401;
+
+  /// test connection error
+  ///
+  /// In en, this message translates to:
+  /// **'✗ ERROR 404 Not Found, check your VA URL'**
+  String get e404;
+
+  /// test connection error
+  ///
+  /// In en, this message translates to:
+  /// **'✗ ERROR 400 Validation Errors, contact developer'**
+  String get e400;
+
+  /// test connection error
+  ///
+  /// In en, this message translates to:
+  /// **'✗ ERROR, check your internet connection'**
+  String get eInternet;
 
   /// Language setting
   ///

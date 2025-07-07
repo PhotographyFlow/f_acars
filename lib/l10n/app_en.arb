@@ -26,14 +26,69 @@
     "description": "Wrong api key message at settings page"
   },
 
-  "deleteApiKey": "Delete API Key",
-  "@deleteApiKey": {
-    "description": "Delete API key button at settings page"
+  "yourVaUrl": "Your VA URL (without'/' on end)",
+  "@yourVaUrl": {
+    "description": "VA URL input box at settings page"
+  },
+
+  "invalidUrl": "invalid url",
+  "@invalidUrl": {
+    "description": "Invalid VA URL message at settings page"
+  },
+
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button"
   },
 
   "submit": "Submit",
   "@submit": {
     "description": "Submit button"
+  },
+
+  "save": "Save",
+  "@save": {
+    "description": "Save button"
+  },
+
+  "testConnection": "Test connection",
+  "@testConnection": {
+    "description": "Test connection in settings page"
+  },
+
+  "test": "Test",
+  "@test": {
+    "description": "Test button"
+  },
+
+  "testOK": "\u2713 OK",
+  "@testOK": {
+    "description": "Test OK message"
+  },
+
+  "eCheckVA": "\u2717 ERROR, check your VA URL",
+  "@eCheckVA": {
+    "description": "test connection error"
+  },
+
+  "e401": "\u2717 ERROR 401 Unauthorized, check your API key and VA URL",
+  "@e401": {
+    "description": "test connection error"
+  },
+
+  "e404": "\u2717 ERROR 404 Not Found, check your VA URL",
+  "@e404": {
+    "description": "test connection error"
+  },
+
+  "e400": "\u2717 ERROR 400 Validation Errors, contact developer",
+  "@e400": {
+    "description": "test connection error"
+  },
+
+  "eInternet": "\u2717 ERROR, check your internet connection",
+  "@eInternet": {
+    "description": "test connection error"
   },
 
   "language": "Language",
