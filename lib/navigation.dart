@@ -24,7 +24,7 @@ class _NavigationState extends State<Navigation> {
   @override
   Widget build(BuildContext context) {
     return NavigationView(
-      appBar: NavigationAppBar(),
+      appBar: NavigationAppBar(automaticallyImplyLeading: false),
       pane: NavigationPane(
         size: NavigationPaneSize(openWidth: 200),
         selected: index,
