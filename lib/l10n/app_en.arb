@@ -94,5 +94,10 @@
   "language": "Language",
   "@language": {
     "description": "Language setting"
+  },
+
+  "weightUnit": "Weight Unit",
+  "@weightUnit": {
+    "description": "Weight unit setting"
   }
 }

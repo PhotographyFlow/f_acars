@@ -64,4 +64,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get language => '语言';
+
+  @override
+  String get weightUnit => '重量单位';
 }

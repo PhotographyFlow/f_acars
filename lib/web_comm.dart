@@ -76,4 +76,33 @@ class WebComm {
     }
     return testConnnectionError;
   }
+
+  Future getBids(
+    String vaUrlController,
+    String apiKeyController,
+    BuildContext context,
+  ) async {
+    try {
+      final response = await get(
+        Uri.parse('$vaUrlController/api/user/bids'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': apiKeyController,
+        },
+      );
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        final responseData = responseBody['data'];
+        if (kDebugMode) {
+          print(responseData);
+        }
+        return responseData;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+      throw Exception('Failed to load bids: $e');
+    }
+  }
 }

@@ -27,6 +27,7 @@ class SettingsPageState extends State<SettingsPage> {
   Timer? _timer;
   AnimationController? _animationController;
   Future? _testFuture;
+  int weightUnit = 0; //0=lbs, 1=kg
 
   @override
   void initState() {
@@ -62,6 +63,9 @@ class SettingsPageState extends State<SettingsPage> {
       vaUrlController.text = jsonSettings['vaUrl'] ?? '';
       apiKeyController.text = jsonSettings['apiKey'] ?? '';
       final localeCode = jsonSettings['locale'];
+      setState(() {
+        weightUnit = jsonSettings['weightUnit'] ?? 0;
+      });
       if (localeCode != null) {
         _selectedLocale = Locale(localeCode);
         _changeLocale(_selectedLocale);
@@ -113,79 +117,6 @@ class SettingsPageState extends State<SettingsPage> {
       widget.onLocaleChanged.call(locale);
     }
   }
-
-  /*
-  Future _testConnection() async {
-    try {
-      final response = await get(
-        Uri.parse('${vaUrlController.text}/api/user'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': apiKeyController.text,
-        },
-      );
-      if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
-        final responseData = responseBody['data'];
-        if (kDebugMode) {
-          print(responseData);
-        }
-        if (responseData.containsKey('id') &&
-            responseData.containsKey('pilot_id') &&
-            responseData.containsKey('ident')) {
-          setState(
-            () => testConnnectionError = Text(
-              AppLocalizations.of(context)!.testOK,
-              style: TextStyle(color: Colors.successPrimaryColor),
-            ),
-          );
-        } else {
-          setState(
-            () => testConnnectionError = Text(
-              AppLocalizations.of(context)!.eCheckVA,
-              style: TextStyle(color: Colors.errorPrimaryColor),
-            ),
-          );
-        }
-      }
-      if (response.statusCode == 401) {
-        setState(
-          () => testConnnectionError = Text(
-            AppLocalizations.of(context)!.e401,
-            style: TextStyle(color: Colors.errorPrimaryColor),
-          ),
-        );
-      }
-      if (response.statusCode == 404) {
-        setState(
-          () => testConnnectionError = Text(
-            AppLocalizations.of(context)!.e404,
-            style: TextStyle(color: Colors.errorPrimaryColor),
-          ),
-        );
-      }
-      if (response.statusCode == 400) {
-        setState(
-          () => testConnnectionError = Text(
-            AppLocalizations.of(context)!.e400,
-            style: TextStyle(color: Colors.errorPrimaryColor),
-          ),
-        );
-      }
-    } catch (e) {
-      setState(
-        () => testConnnectionError = Text(
-          AppLocalizations.of(context)!.eInternet,
-          style: TextStyle(color: Colors.errorPrimaryColor),
-        ),
-      );
-      if (kDebugMode) {
-        print(e);
-      }
-    }
-  }
-
-*/
 
   //Settings page
   @override
@@ -341,12 +272,33 @@ class SettingsPageState extends State<SettingsPage> {
                 testConnnectionError ?? Text(''),
               ],
             ),
+            SizedBox(height: 20),
+
+            //select weight unit
+            Text(AppLocalizations.of(context)!.weightUnit),
+            SizedBox(height: 10),
+
+            //select weight unit combo box
+            ComboBox(
+              value: weightUnit,
+              onChanged: (int? value) {
+                setState(() {
+                  weightUnit = value!;
+                  _saveSettings('weightUnit', value);
+                });
+              },
+              items: [
+                ComboBoxItem(value: 0, child: Text('lbs')),
+                ComboBoxItem(value: 1, child: Text('kg')),
+              ],
+            ),
 
             //select language
             SizedBox(height: 20),
             Text(AppLocalizations.of(context)!.language),
-            SizedBox(height: 10),
+
             //select language combo box
+            SizedBox(height: 10),
             ComboBox(
               value: _selectedLocale,
               onChanged: (Locale? locale) {
