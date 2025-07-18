@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:f_acars/l10n/app_localizations.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'web_comm.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'l10n/locale_names.dart';
 import 'dart:convert';
-import 'package:http/http.dart';
 
 class SettingsPage extends StatefulWidget {
   final Function(Locale) onLocaleChanged;
@@ -32,7 +32,7 @@ class SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     _selectedLocale = Locale('en');
-    vaUrlController.text = 'https://vms.example.com';
+    vaUrlController.text = '';
     _loadSettings();
     vaUrlController.addListener(() {
       _validateVaUrl(vaUrlController.text);
@@ -59,8 +59,8 @@ class SettingsPageState extends State<SettingsPage> {
     final settings = await _storage.read(key: 'settings');
     if (settings != null) {
       final jsonSettings = jsonDecode(settings);
-      vaUrlController.text = jsonSettings['vaUrl'];
-      apiKeyController.text = jsonSettings['apiKey'];
+      vaUrlController.text = jsonSettings['vaUrl'] ?? '';
+      apiKeyController.text = jsonSettings['apiKey'] ?? '';
       final localeCode = jsonSettings['locale'];
       if (localeCode != null) {
         _selectedLocale = Locale(localeCode);
@@ -114,6 +114,7 @@ class SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  /*
   Future _testConnection() async {
     try {
       final response = await get(
@@ -183,6 +184,8 @@ class SettingsPageState extends State<SettingsPage> {
       }
     }
   }
+
+*/
 
   //Settings page
   @override
@@ -293,11 +296,24 @@ class SettingsPageState extends State<SettingsPage> {
                       setState(() {
                         _isTesting = true;
                       });
-                      _testFuture = _testConnection().then((_) {
-                        setState(() {
-                          _isTesting = false;
-                        });
-                      });
+                      _testFuture = WebComm()
+                          .testConnection(
+                            vaUrlController,
+                            apiKeyController,
+                            apiKeyValidationError,
+                            vaUrlValidationError,
+                            null,
+                            context,
+                          )
+                          .then((result) {
+                            if (kDebugMode) {
+                              print('Result: $result');
+                            }
+                            setState(() {
+                              testConnnectionError = result;
+                              _isTesting = false;
+                            });
+                          });
                     }
                   },
                   child: Text(AppLocalizations.of(context)!.test),
