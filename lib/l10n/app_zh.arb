@@ -86,7 +86,7 @@
     "description": "test connection error"
   },
 
-  "eInternet": "\u2717 失败, 检查您的网络连接",
+  "eInternet": "\u2717 失败, 检查您的网络连接和 VA 链接设置",
   "@eInternet": {
     "description": "test connection error"
   },
