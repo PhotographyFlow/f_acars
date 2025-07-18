@@ -86,7 +86,7 @@
     "description": "test connection error"
   },
 
-  "eInternet": "\u2717 ERROR, check your internet connection",
+  "eInternet": "\u2717 ERROR, check your internet connection and VA URL setting",
   "@eInternet": {
     "description": "test connection error"
   },

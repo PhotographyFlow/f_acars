@@ -60,7 +60,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get e400 => '✗ 错误 400 验证错误, 联系开发者';
 
   @override
-  String get eInternet => '✗ 失败, 检查您的网络连接';
+  String get eInternet => '✗ 失败, 检查您的网络连接和 VA 链接设置';
 
   @override
   String get language => '语言';

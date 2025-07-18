@@ -200,7 +200,7 @@ abstract class AppLocalizations {
   /// test connection error
   ///
   /// In en, this message translates to:
-  /// **'✗ ERROR, check your internet connection'**
+  /// **'✗ ERROR, check your internet connection and VA URL setting'**
   String get eInternet;
 
   /// Language setting

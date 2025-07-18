@@ -60,7 +60,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get e400 => '✗ ERROR 400 Validation Errors, contact developer';
 
   @override
-  String get eInternet => '✗ ERROR, check your internet connection';
+  String get eInternet => '✗ ERROR, check your internet connection and VA URL setting';
 
   @override
   String get language => 'Language';
