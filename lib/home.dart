@@ -5,6 +5,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'package:flutter/services.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -54,6 +55,8 @@ class _HomePageState extends State<HomePage> {
 
   final apiKeyController = TextEditingController();
   final vaUrlController = TextEditingController();
+  int weightUnit = 0; // 0=lbs, 1=kg
+
   String? airlineIcao;
   String? flightNumber;
   String? depAirport;
@@ -62,6 +65,9 @@ class _HomePageState extends State<HomePage> {
   String? aircraftIcao;
   String? aircraftName;
   String? aircraftReg;
+
+  final blockFuelController = TextEditingController();
+  final routeController = TextEditingController();
 
   @override
   void initState() {
@@ -75,6 +81,10 @@ class _HomePageState extends State<HomePage> {
       apiKeyController.text;
     });
 
+    routeController.addListener(() {
+      setState(() {}); // Update the UI
+    });
+
     _timer?.cancel();
     _animationController?.removeListener(() {});
     _animationController?.dispose();
@@ -86,6 +96,7 @@ class _HomePageState extends State<HomePage> {
     _animationController?.removeListener(() {});
     _animationController?.dispose();
     _testFuture?.then((_) => null).catchError((_) => null);
+
     super.dispose();
   }
 
@@ -104,7 +115,7 @@ class _HomePageState extends State<HomePage> {
             return InfoBar(
               title: const Text('No bids found :('),
               content: const Text(
-                'Looks like you don\'t have any yet. Add one bid at your VA website and try again.',
+                'Looks like you don\'t have any bids yet. Add one bid at your VA website and try again.',
               ),
               action: IconButton(
                 icon: const Icon(FluentIcons.clear),
@@ -128,6 +139,7 @@ class _HomePageState extends State<HomePage> {
             aircraftReg =
                 result[0]['flight']['subfleets'][0]['aircraft'][0]['registration'];
             fares = result[0]['flight']['subfleets'][0]['fares'];
+            routeController.text = result[0]['flight']['route'];
           });
         }
       }
@@ -145,6 +157,7 @@ class _HomePageState extends State<HomePage> {
       aircraftName = null;
       aircraftReg = null;
       fares = [];
+      routeController.text = '';
     });
   }
 
@@ -154,10 +167,33 @@ class _HomePageState extends State<HomePage> {
       final jsonSettings = jsonDecode(settings);
       vaUrlController.text = jsonSettings['vaUrl'] ?? '';
       apiKeyController.text = jsonSettings['apiKey'] ?? '';
+      weightUnit = jsonSettings['weightUnit'] ?? 0;
+      setState(() {});
+
       if (kDebugMode) {
         print(vaUrlController.text);
         print(apiKeyController.text);
       }
+    }
+
+    if (vaUrlController.text.isEmpty || apiKeyController.text.isEmpty) {
+      await displayInfoBar(
+        duration: Duration(seconds: 5),
+        context,
+        builder: (context, close) {
+          return InfoBar(
+            title: const Text('No VA info settings found :('),
+            content: const Text(
+              'Please set your VA URL and API key at settings page.',
+            ),
+            action: IconButton(
+              icon: const Icon(FluentIcons.clear),
+              onPressed: close,
+            ),
+            severity: InfoBarSeverity.warning,
+          );
+        },
+      );
     }
   }
 
@@ -195,7 +231,11 @@ class _HomePageState extends State<HomePage> {
                 ),
 
                 Button(
-                  onPressed: _loadBids,
+                  onPressed:
+                      vaUrlController.text.isEmpty ||
+                          apiKeyController.text.isEmpty
+                      ? null
+                      : _loadBids,
                   child: Row(
                     children: [
                       Text('Refresh'),
@@ -224,6 +264,8 @@ class _HomePageState extends State<HomePage> {
             SizedBox(height: 15),
           ],
         ),
+
+        // First row, flight infos
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -294,6 +336,7 @@ class _HomePageState extends State<HomePage> {
                   Icon(FluentIcons.airplane, size: 20.0),
                 ],
               ),
+
               Expanded(
                 child: Column(
                   spacing: 5.0,
@@ -316,8 +359,9 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           SizedBox(height: 20.0),
+
+          // Second row, aircraft info
           Row(
-            spacing: 20.0,
             children: [
               Expanded(
                 child: Column(
@@ -338,7 +382,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-
+              SizedBox(width: 20.0),
               Expanded(
                 child: Column(
                   spacing: 5.0,
@@ -358,7 +402,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-
+              SizedBox(width: 20.0),
               Expanded(
                 child: Column(
                   spacing: 5.0,
@@ -378,7 +422,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-
+              SizedBox(width: 20.0),
               Expanded(
                 child: Column(
                   spacing: 5.0,
@@ -398,7 +442,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-
+              SizedBox(width: 20.0),
               Expanded(
                 child: Column(
                   spacing: 5.0,
@@ -407,15 +451,63 @@ class _HomePageState extends State<HomePage> {
                     TextBox(
                       style: TextStyle(fontSize: 24.0),
                       textAlign: TextAlign.center,
+                      keyboardType: TextInputType.number,
+                      controller: blockFuelController,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                        TextInputFormatter.withFunction((oldValue, newValue) {
+                          if (newValue.text.isEmpty) {
+                            return newValue; // Allow empty string
+                          }
+                          if (newValue.text.length > 7) {
+                            return oldValue;
+                          }
+                          if (newValue.text.startsWith('0') &&
+                              newValue.text.length > 1) {
+                            return oldValue; // Disallow leading zeros
+                          }
+                          int value = int.parse(newValue.text);
+                          if (value < 0 || value > 9999999) {
+                            return oldValue;
+                          }
+                          return newValue;
+                        }),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                child: Row(
+                  children: [
+                    Column(
+                      spacing: 5.0,
+                      children: [
+                        Text(''),
+                        SizedBox(
+                          width: 60,
+                          child: TextBox(
+                            enabled: false,
+                            readOnly: true,
+                            placeholder: weightUnit == 1 ? 'KG' : 'LBS',
+                            placeholderStyle: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24.0,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          //fares
+
           SizedBox(height: 20.0),
 
+          //fares
           Column(
             children: [
               Row(
@@ -508,12 +600,60 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           SizedBox(height: 20.0),
+
           //route
           Text('Route'),
           SizedBox(height: 10.0),
-          SizedBox(
-            height: 200.0,
-            child: TextBox(maxLines: null, placeholder: 'Route'),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: 180.0,
+                child: TextBox(controller: routeController, maxLines: null),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[140].withAlpha(90)),
+                  borderRadius: BorderRadius.circular(5.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey[120].withAlpha(32),
+                      spreadRadius: 1,
+                      blurRadius: 2,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                ),
+                padding: EdgeInsets.all(5.0),
+                child:
+                    //highlight airways, assume airways are contain numbers
+                    //I think this is the best way so far :(
+                    //Anyone have better way?
+                    Text.rich(
+                      TextSpan(
+                        children: routeController.text.split(' ').map((part) {
+                          if (part.contains(RegExp(r'\d'))) {
+                            return TextSpan(
+                              text: '$part ',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15.0,
+                              ),
+                            );
+                          } else {
+                            return TextSpan(
+                              text: '$part ',
+                              style: TextStyle(
+                                color: Colors.grey[100],
+                                fontSize: 15.0,
+                              ),
+                            );
+                          }
+                        }).toList(),
+                      ),
+                    ),
+              ),
+            ],
           ),
         ],
       ),
