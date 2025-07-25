@@ -37,7 +37,7 @@ class WebComm {
           return testConnnectionError;
         } else {
           testConnnectionError = Text(
-            AppLocalizations.of(context)!.eCheckVA,
+            '\u2717${AppLocalizations.of(context)!.eCheckVA}',
             style: TextStyle(color: Colors.errorPrimaryColor),
           );
           return testConnnectionError;
@@ -45,21 +45,21 @@ class WebComm {
       }
       if (response.statusCode == 401) {
         testConnnectionError = Text(
-          AppLocalizations.of(context)!.e401,
+          '\u2717${AppLocalizations.of(context)!.e401}',
           style: TextStyle(color: Colors.errorPrimaryColor),
         );
         return testConnnectionError;
       }
       if (response.statusCode == 404) {
         testConnnectionError = Text(
-          AppLocalizations.of(context)!.e404,
+          '\u2717${AppLocalizations.of(context)!.e404}',
           style: TextStyle(color: Colors.errorPrimaryColor),
         );
         return testConnnectionError;
       }
       if (response.statusCode == 400) {
         testConnnectionError = Text(
-          AppLocalizations.of(context)!.e400,
+          '\u2717${AppLocalizations.of(context)!.e400}',
           style: TextStyle(color: Colors.errorPrimaryColor),
         );
         return testConnnectionError;
@@ -92,17 +92,84 @@ class WebComm {
       );
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
-        final responseData = responseBody['data'];
+        final responseData = responseBody['data'][0];
         if (kDebugMode) {
           print(responseData);
         }
-        return responseData;
+        if (responseData.containsKey('id') &&
+            responseData.containsKey('flight_id') &&
+            responseData.containsKey('aircraft_id')) {
+          return responseData;
+        }
+      }
+      if (response.statusCode == 401) {
+        await displayInfoBar(
+          context,
+          builder: (context, close) {
+            return InfoBar(
+              title: const Text('Error'),
+              content: Text(AppLocalizations.of(context)!.e401),
+              action: IconButton(
+                icon: const Icon(FluentIcons.clear),
+                onPressed: close,
+              ),
+              severity: InfoBarSeverity.error,
+            );
+          },
+        );
+      }
+      if (response.statusCode == 404) {
+        await displayInfoBar(
+          context,
+          builder: (context, close) {
+            return InfoBar(
+              title: const Text('Error'),
+              content: Text(AppLocalizations.of(context)!.e404),
+              action: IconButton(
+                icon: const Icon(FluentIcons.clear),
+                onPressed: close,
+              ),
+              severity: InfoBarSeverity.error,
+            );
+          },
+        );
+      }
+      if (response.statusCode == 400) {
+        await displayInfoBar(
+          context,
+          builder: (context, close) {
+            return InfoBar(
+              title: const Text('Error'),
+              content: Text(AppLocalizations.of(context)!.e400),
+              action: IconButton(
+                icon: const Icon(FluentIcons.clear),
+                onPressed: close,
+              ),
+              severity: InfoBarSeverity.error,
+            );
+          },
+        );
       }
     } catch (e) {
+      await displayInfoBar(
+        context,
+        builder: (context, close) {
+          return InfoBar(
+            title: const Text('No bids found :('),
+            content: const Text(
+              'Couldn\'t find any bids. Check your settings and internet connection or add one bid at your VA website.',
+            ),
+            action: IconButton(
+              icon: const Icon(FluentIcons.clear),
+              onPressed: close,
+            ),
+            severity: InfoBarSeverity.warning,
+          );
+        },
+      );
       if (kDebugMode) {
         print(e);
       }
-      throw Exception('Failed to load bids: $e');
     }
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'dart:math';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -66,6 +67,9 @@ class _HomePageState extends State<HomePage> {
   String? aircraftName;
   String? aircraftReg;
 
+  late int loadFactor;
+  late int loadFactorVariance;
+
   final blockFuelController = TextEditingController();
   final routeController = TextEditingController();
 
@@ -100,6 +104,31 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  void generateRandomCounts(
+    List<dynamic> fares,
+    int loadFactor,
+    int loadFactorVariance,
+  ) {
+    for (var fare in fares) {
+      int minCount =
+          fare["capacity"] * ((loadFactor - loadFactorVariance) / 100).toInt();
+      if (minCount < 0) {
+        minCount = 0;
+      }
+      int maxCount =
+          fare["capacity"] * ((loadFactor + loadFactorVariance) / 100).toInt();
+      if (maxCount > fare["capacity"]) {
+        maxCount = fare["capacity"];
+      }
+      final randomCount = Random().nextInt(maxCount) + minCount;
+      fare["count"] = randomCount.round();
+    }
+
+    if (kDebugMode) {
+      print(fares);
+    }
+  }
+
   Future<void> _loadBids() async {
     WebComm webComm = WebComm();
     webComm.getBids(vaUrlController.text, apiKeyController.text, context).then((
@@ -108,39 +137,28 @@ class _HomePageState extends State<HomePage> {
       if (kDebugMode) {
         print('Result: $result');
       }
-      if (result.isEmpty) {
-        await displayInfoBar(
-          context,
-          builder: (context, close) {
-            return InfoBar(
-              title: const Text('No bids found :('),
-              content: const Text(
-                'Looks like you don\'t have any bids yet. Add one bid at your VA website and try again.',
-              ),
-              action: IconButton(
-                icon: const Icon(FluentIcons.clear),
-                onPressed: close,
-              ),
-              severity: InfoBarSeverity.warning,
-            );
-          },
-        );
+      if (result == null) {
+        return; // Do nothing if result is null
       } else {
         if (mounted) {
           setState(() {
-            airlineIcao = result[0]['flight']['callsign'];
-            flightNumber = result[0]['flight']['flight_number'].toString();
-            depAirport = result[0]['flight']['dpt_airport_id'];
-            arrAirport = result[0]['flight']['arr_airport_id'];
-            aircraftType = result[0]['flight']['subfleets'][0]['type'];
+            airlineIcao = result['flight']['airline']['icao'];
+            flightNumber = result['flight']['flight_number'].toString();
+            depAirport = result['flight']['dpt_airport_id'];
+            arrAirport = result['flight']['arr_airport_id'];
+            aircraftType = result['flight']['subfleets'][0]['type'];
             aircraftIcao =
-                result[0]['flight']['subfleets'][0]['aircraft'][0]['icao'];
-            aircraftName = result[0]['flight']['subfleets'][0]['name'];
+                result['flight']['subfleets'][0]['aircraft'][0]['icao'];
+            aircraftName = result['flight']['subfleets'][0]['name'];
             aircraftReg =
-                result[0]['flight']['subfleets'][0]['aircraft'][0]['registration'];
-            fares = result[0]['flight']['subfleets'][0]['fares'];
-            routeController.text = result[0]['flight']['route'];
+                result['flight']['subfleets'][0]['aircraft'][0]['registration'];
+            fares = result['flight']['subfleets'][0]['fares'];
+            routeController.text = result['flight']['route'];
+            loadFactor = result['flight']['load_factor'].toInt();
+            loadFactorVariance = result['flight']['load_factor_variance']
+                .toInt();
           });
+          generateRandomCounts(fares, loadFactor, loadFactorVariance);
         }
       }
     });
@@ -525,7 +543,8 @@ class _HomePageState extends State<HomePage> {
                                     TextBox(
                                       enabled: false,
                                       readOnly: true,
-                                      placeholder: entry.value['name'],
+                                      placeholder:
+                                          '${entry.value['name']} (max: ${entry.value['capacity']})',
                                       placeholderStyle: TextStyle(
                                         color: Colors.grey[100],
                                         fontSize: 24.0,
@@ -574,11 +593,12 @@ class _HomePageState extends State<HomePage> {
                                   clearButton: false,
                                   min: 0,
                                   max: entry.value['capacity'],
-                                  value: 0,
+                                  value: entry.value['count'],
                                   onChanged: (value) {
                                     // Handle the changed value
+                                    entry.value['count'] = value;
                                     if (kDebugMode) {
-                                      print('Changed value: $value');
+                                      print(fares);
                                     }
                                   },
                                 ),

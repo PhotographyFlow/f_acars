@@ -66,27 +66,27 @@
     "description": "Test OK message"
   },
 
-  "eCheckVA": "\u2717 ERROR, check your VA URL",
+  "eCheckVA": "ERROR, check your VA URL",
   "@eCheckVA": {
     "description": "test connection error"
   },
 
-  "e401": "\u2717 ERROR 401 Unauthorized, check your API key and VA URL",
+  "e401": "ERROR 401 Unauthorized, check your API key and VA URL",
   "@e401": {
     "description": "test connection error"
   },
 
-  "e404": "\u2717 ERROR 404 Not Found, check your VA URL",
+  "e404": "ERROR 404 Not Found, check your VA URL",
   "@e404": {
     "description": "test connection error"
   },
 
-  "e400": "\u2717 ERROR 400 Validation Errors, contact developer",
+  "e400": "ERROR 400 Validation Errors, contact developer",
   "@e400": {
     "description": "test connection error"
   },
 
-  "eInternet": "\u2717 ERROR, check your internet connection and VA URL setting",
+  "eInternet": "ERROR, check your internet connection and VA URL setting",
   "@eInternet": {
     "description": "test connection error"
   },

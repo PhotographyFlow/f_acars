@@ -48,19 +48,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get testOK => '✓ 成功';
 
   @override
-  String get eCheckVA => '✗ 失败，检查您的 VA 链接';
+  String get eCheckVA => '失败，检查您的 VA 链接';
 
   @override
-  String get e401 => '✗ 错误 401 未授权, 检查您的 API 密钥和 VA 链接';
+  String get e401 => '错误 401 未授权, 检查您的 API 密钥和 VA 链接';
 
   @override
-  String get e404 => '✗ 错误 404 请求不存在, 检查您的 VA 链接';
+  String get e404 => '错误 404 请求不存在, 检查您的 VA 链接';
 
   @override
-  String get e400 => '✗ 错误 400 验证错误, 联系开发者';
+  String get e400 => '错误 400 验证错误, 联系开发者';
 
   @override
-  String get eInternet => '✗ 失败, 检查您的网络连接和 VA 链接设置';
+  String get eInternet => '失败, 检查您的网络连接和 VA 链接设置';
 
   @override
   String get language => '语言';
