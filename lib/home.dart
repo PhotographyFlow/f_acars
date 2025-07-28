@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    vaUrlController.text = '';
+    blockFuelController.text = '0';
     _loadSettings();
     vaUrlController.addListener(() {
       vaUrlController.text;
@@ -109,23 +109,30 @@ class _HomePageState extends State<HomePage> {
     int loadFactor,
     int loadFactorVariance,
   ) {
+    if (kDebugMode) {
+      print(loadFactor);
+      print(loadFactorVariance);
+    }
     for (var fare in fares) {
       int minCount =
-          fare["capacity"] * ((loadFactor - loadFactorVariance) / 100).toInt();
+          (fare["capacity"] * ((loadFactor - loadFactorVariance) / 100))
+              .toInt();
       if (minCount < 0) {
         minCount = 0;
       }
       int maxCount =
-          fare["capacity"] * ((loadFactor + loadFactorVariance) / 100).toInt();
+          (fare["capacity"] * ((loadFactor + loadFactorVariance) / 100))
+              .toInt();
       if (maxCount > fare["capacity"]) {
         maxCount = fare["capacity"];
       }
-      final randomCount = Random().nextInt(maxCount) + minCount;
+      final randomCount = Random().nextInt(maxCount - minCount + 1) + minCount;
       fare["count"] = randomCount.round();
-    }
 
-    if (kDebugMode) {
-      print(fares);
+      if (kDebugMode) {
+        print(minCount);
+        print(maxCount);
+      }
     }
   }
 
@@ -475,7 +482,10 @@ class _HomePageState extends State<HomePage> {
                         FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
                         TextInputFormatter.withFunction((oldValue, newValue) {
                           if (newValue.text.isEmpty) {
-                            return newValue; // Allow empty string
+                            return TextEditingValue(
+                              text: '0',
+                              selection: TextSelection.collapsed(offset: 1),
+                            );
                           }
                           if (newValue.text.length > 7) {
                             return oldValue;
