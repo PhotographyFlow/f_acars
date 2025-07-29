@@ -5,8 +5,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'l10n/l10n.dart';
+import 'package:flutter_acrylic/flutter_acrylic.dart';
 
-void main() => runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Window.initialize();
+  runApp(MyApp());
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -26,10 +31,13 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  WindowEffect effect = WindowEffect.transparent;
+
   @override
   void initState() {
     super.initState();
-    _loadLang(); // Load settings on launch
+    _loadLang();
+    // Load settings on launch
   }
 
   Future<void> _loadLang() async {
@@ -44,8 +52,13 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  void setEffect(WindowEffect effect, BuildContext context) {
+    Window.setEffect(effect: effect, color: Colors.transparent, dark: true);
+  }
+
   @override
   Widget build(BuildContext context) {
+    setEffect(WindowEffect.mica, context);
     return FluentApp(
       locale: _selectedLocale,
       localizationsDelegates: [
@@ -59,6 +72,10 @@ class _MyAppState extends State<MyApp> {
       theme: FluentThemeData(
         brightness: Brightness.dark,
         accentColor: Colors.blue,
+        //scaffoldBackgroundColor: Colors.transparent,
+        navigationPaneTheme: NavigationPaneThemeData(
+          backgroundColor: Colors.transparent,
+        ),
       ),
       home: Navigation(onLocaleChanged: onLocaleChanged),
     );

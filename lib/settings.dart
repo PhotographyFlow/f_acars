@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:f_acars/l10n/app_localizations.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'web_comm.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'l10n/locale_names.dart';
 import 'dart:convert';
-import 'package:http/http.dart';
 
 class SettingsPage extends StatefulWidget {
   final Function(Locale) onLocaleChanged;
@@ -27,12 +27,13 @@ class SettingsPageState extends State<SettingsPage> {
   Timer? _timer;
   AnimationController? _animationController;
   Future? _testFuture;
+  int weightUnit = 0; //0=lbs, 1=kg
 
   @override
   void initState() {
     super.initState();
     _selectedLocale = Locale('en');
-    vaUrlController.text = 'https://vms.example.com';
+    vaUrlController.text = '';
     _loadSettings();
     vaUrlController.addListener(() {
       _validateVaUrl(vaUrlController.text);
@@ -59,9 +60,12 @@ class SettingsPageState extends State<SettingsPage> {
     final settings = await _storage.read(key: 'settings');
     if (settings != null) {
       final jsonSettings = jsonDecode(settings);
-      vaUrlController.text = jsonSettings['vaUrl'];
-      apiKeyController.text = jsonSettings['apiKey'];
+      vaUrlController.text = jsonSettings['vaUrl'] ?? '';
+      apiKeyController.text = jsonSettings['apiKey'] ?? '';
       final localeCode = jsonSettings['locale'];
+      setState(() {
+        weightUnit = jsonSettings['weightUnit'] ?? 0;
+      });
       if (localeCode != null) {
         _selectedLocale = Locale(localeCode);
         _changeLocale(_selectedLocale);
@@ -111,76 +115,6 @@ class SettingsPageState extends State<SettingsPage> {
   void _changeLocale(Locale? locale) {
     if (locale != null) {
       widget.onLocaleChanged.call(locale);
-    }
-  }
-
-  Future _testConnection() async {
-    try {
-      final response = await get(
-        Uri.parse('${vaUrlController.text}/api/user'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': apiKeyController.text,
-        },
-      );
-      if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
-        final responseData = responseBody['data'];
-        if (kDebugMode) {
-          print(responseData);
-        }
-        if (responseData.containsKey('id') &&
-            responseData.containsKey('pilot_id') &&
-            responseData.containsKey('ident')) {
-          setState(
-            () => testConnnectionError = Text(
-              AppLocalizations.of(context)!.testOK,
-              style: TextStyle(color: Colors.successPrimaryColor),
-            ),
-          );
-        } else {
-          setState(
-            () => testConnnectionError = Text(
-              AppLocalizations.of(context)!.eCheckVA,
-              style: TextStyle(color: Colors.errorPrimaryColor),
-            ),
-          );
-        }
-      }
-      if (response.statusCode == 401) {
-        setState(
-          () => testConnnectionError = Text(
-            AppLocalizations.of(context)!.e401,
-            style: TextStyle(color: Colors.errorPrimaryColor),
-          ),
-        );
-      }
-      if (response.statusCode == 404) {
-        setState(
-          () => testConnnectionError = Text(
-            AppLocalizations.of(context)!.e404,
-            style: TextStyle(color: Colors.errorPrimaryColor),
-          ),
-        );
-      }
-      if (response.statusCode == 400) {
-        setState(
-          () => testConnnectionError = Text(
-            AppLocalizations.of(context)!.e400,
-            style: TextStyle(color: Colors.errorPrimaryColor),
-          ),
-        );
-      }
-    } catch (e) {
-      setState(
-        () => testConnnectionError = Text(
-          AppLocalizations.of(context)!.eInternet,
-          style: TextStyle(color: Colors.errorPrimaryColor),
-        ),
-      );
-      if (kDebugMode) {
-        print(e);
-      }
     }
   }
 
@@ -293,11 +227,24 @@ class SettingsPageState extends State<SettingsPage> {
                       setState(() {
                         _isTesting = true;
                       });
-                      _testFuture = _testConnection().then((_) {
-                        setState(() {
-                          _isTesting = false;
-                        });
-                      });
+                      _testFuture = WebComm()
+                          .testConnection(
+                            vaUrlController,
+                            apiKeyController,
+                            apiKeyValidationError,
+                            vaUrlValidationError,
+                            null,
+                            context,
+                          )
+                          .then((result) {
+                            if (kDebugMode) {
+                              print('Result: $result');
+                            }
+                            setState(() {
+                              testConnnectionError = result;
+                              _isTesting = false;
+                            });
+                          });
                     }
                   },
                   child: Text(AppLocalizations.of(context)!.test),
@@ -325,12 +272,33 @@ class SettingsPageState extends State<SettingsPage> {
                 testConnnectionError ?? Text(''),
               ],
             ),
+            SizedBox(height: 20),
+
+            //select weight unit
+            Text(AppLocalizations.of(context)!.weightUnit),
+            SizedBox(height: 10),
+
+            //select weight unit combo box
+            ComboBox(
+              value: weightUnit,
+              onChanged: (int? value) {
+                setState(() {
+                  weightUnit = value!;
+                  _saveSettings('weightUnit', value);
+                });
+              },
+              items: [
+                ComboBoxItem(value: 0, child: Text('lbs')),
+                ComboBoxItem(value: 1, child: Text('kg')),
+              ],
+            ),
 
             //select language
             SizedBox(height: 20),
             Text(AppLocalizations.of(context)!.language),
-            SizedBox(height: 10),
+
             //select language combo box
+            SizedBox(height: 10),
             ComboBox(
               value: _selectedLocale,
               onChanged: (Locale? locale) {

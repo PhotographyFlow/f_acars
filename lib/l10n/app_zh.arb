@@ -66,27 +66,27 @@
     "description": "Test OK message"
   },
 
-  "eCheckVA": "\u2717 失败，检查您的 VA 链接",
+  "eCheckVA": "失败，检查您的 VA 链接",
   "@eCheckVA": {
     "description": "test connection error"
   },
 
-  "e401": "\u2717 错误 401 未授权, 检查您的 API 密钥和 VA 链接",
+  "e401": "错误 401 未授权, 检查您的 API 密钥和 VA 链接",
   "@e401": {
     "description": "test connection error"
   },
 
-  "e404": "\u2717 错误 404 请求不存在, 检查您的 VA 链接",
+  "e404": "错误 404 请求不存在, 检查您的 VA 链接",
   "@e404": {
     "description": "test connection error"
   },
 
-  "e400": "\u2717 错误 400 验证错误, 联系开发者",
+  "e400": "错误 400 验证错误, 联系开发者",
   "@e400": {
     "description": "test connection error"
   },
 
-  "eInternet": "\u2717 失败, 检查您的网络连接",
+  "eInternet": "失败, 检查您的网络连接和 VA 链接设置",
   "@eInternet": {
     "description": "test connection error"
   },
@@ -94,5 +94,10 @@
   "language": "语言",
   "@language": {
     "description": "Language setting"
+  },
+
+  "weightUnit": "重量单位",
+  "@weightUnit": {
+    "description": "Weight unit setting"
   }
 }

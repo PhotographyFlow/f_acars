@@ -176,31 +176,31 @@ abstract class AppLocalizations {
   /// test connection error
   ///
   /// In en, this message translates to:
-  /// **'✗ ERROR, check your VA URL'**
+  /// **'ERROR, check your VA URL'**
   String get eCheckVA;
 
   /// test connection error
   ///
   /// In en, this message translates to:
-  /// **'✗ ERROR 401 Unauthorized, check your API key and VA URL'**
+  /// **'ERROR 401 Unauthorized, check your API key and VA URL'**
   String get e401;
 
   /// test connection error
   ///
   /// In en, this message translates to:
-  /// **'✗ ERROR 404 Not Found, check your VA URL'**
+  /// **'ERROR 404 Not Found, check your VA URL'**
   String get e404;
 
   /// test connection error
   ///
   /// In en, this message translates to:
-  /// **'✗ ERROR 400 Validation Errors, contact developer'**
+  /// **'ERROR 400 Validation Errors, contact developer'**
   String get e400;
 
   /// test connection error
   ///
   /// In en, this message translates to:
-  /// **'✗ ERROR, check your internet connection'**
+  /// **'ERROR, check your internet connection and VA URL setting'**
   String get eInternet;
 
   /// Language setting
@@ -208,6 +208,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get language;
+
+  /// Weight unit setting
+  ///
+  /// In en, this message translates to:
+  /// **'Weight Unit'**
+  String get weightUnit;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

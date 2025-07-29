@@ -48,20 +48,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get testOK => '✓ OK';
 
   @override
-  String get eCheckVA => '✗ ERROR, check your VA URL';
+  String get eCheckVA => 'ERROR, check your VA URL';
 
   @override
-  String get e401 => '✗ ERROR 401 Unauthorized, check your API key and VA URL';
+  String get e401 => 'ERROR 401 Unauthorized, check your API key and VA URL';
 
   @override
-  String get e404 => '✗ ERROR 404 Not Found, check your VA URL';
+  String get e404 => 'ERROR 404 Not Found, check your VA URL';
 
   @override
-  String get e400 => '✗ ERROR 400 Validation Errors, contact developer';
+  String get e400 => 'ERROR 400 Validation Errors, contact developer';
 
   @override
-  String get eInternet => '✗ ERROR, check your internet connection';
+  String get eInternet => 'ERROR, check your internet connection and VA URL setting';
 
   @override
   String get language => 'Language';
+
+  @override
+  String get weightUnit => 'Weight Unit';
 }
