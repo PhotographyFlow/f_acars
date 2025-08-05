@@ -1,8 +1,10 @@
+import 'package:f_acars/Flight/prefile_error.dart';
 import 'package:http/http.dart';
 import 'package:flutter/foundation.dart';
 import 'package:f_acars/l10n/app_localizations.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'dart:convert';
+import 'dart:async';
 
 class WebComm {
   Future testConnection(
@@ -172,4 +174,119 @@ class WebComm {
       }
     }
   }
+
+  Future prefilePireps(
+    String vaUrlController,
+    String apiKeyController,
+    BuildContext context,
+    int airlineID,
+    int aircraftID,
+    String bidID,
+    String depAirport,
+    String arrAirport,
+    String flightNumber,
+    String route,
+    num plannedDistance,
+    int plannedFlightTime,
+    int blockFuel,
+    List<dynamic> fares,
+  ) async {
+    try {
+      final response = await post(
+        Uri.parse('$vaUrlController/api/pireps/prefile'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': apiKeyController,
+        },
+        body: jsonEncode({
+          "airline_id": airlineID,
+          "aircraft_id": aircraftID,
+          "flight_id": bidID,
+          "dpt_airport_id": depAirport,
+          "arr_airport_id": arrAirport,
+          "flight_number": flightNumber,
+          "route": route,
+          "planned_distance": plannedDistance,
+          "distance": 0.01,
+          "planned_flight_time": plannedFlightTime,
+          "flight_time": 0,
+          "block_fuel": blockFuel,
+          "fares": fares,
+          "source_name": "F-ACARS",
+        }),
+      );
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        final responseData = responseBody['data'];
+        if (kDebugMode) {
+          print(responseData);
+        }
+        if (responseData.containsKey('id') &&
+            responseData.containsKey('flight_id') &&
+            responseData.containsKey('aircraft_id')) {
+          return responseData;
+        } else {
+          throw Exception('Prefiling failed');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+      Navigator.of(context, rootNavigator: true).push(
+        FluentPageRoute(
+          builder: (context) {
+            return PrefileErrorPage();
+          },
+        ),
+      );
+      showPrefileError(context, e);
+    }
+  }
+}
+
+void showPrefileError(BuildContext context, e) async {
+  await showDialog<String>(
+    context: context,
+    builder: (context) => ContentDialog(
+      title: const Text('Prefiling error!'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 10,
+        children: [
+          Text(
+            'There is an error occurred while prefiling. Please check your settings and internet connection.',
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: FluentTheme.of(
+                context,
+              ).resources.controlStrokeColorSecondary,
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(
+                color: FluentTheme.of(
+                  context,
+                ).resources.controlStrokeColorSecondary,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(7.0),
+              child: Text(e.toString()),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        Button(
+          child: const Text('Back'),
+          onPressed: () {
+            Navigator.pop(context);
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+        ),
+      ],
+    ),
+  );
 }

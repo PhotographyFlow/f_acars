@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:math';
+import 'Flight/start_flight_loading.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -53,10 +54,10 @@ class _HomePageState extends State<HomePage> {
   Future? _testFuture;
 
   final _storage = const FlutterSecureStorage();
-
   final apiKeyController = TextEditingController();
   final vaUrlController = TextEditingController();
   int weightUnit = 0; // 0=lbs, 1=kg
+  bool _isLoading = false;
 
   String? airlineIcao;
   String? flightNumber;
@@ -67,23 +68,26 @@ class _HomePageState extends State<HomePage> {
   String? aircraftName;
   String? aircraftReg;
 
+  String? flightID;
+  late int airlineID;
+  late int aircraftID;
+
+  late num plannedDistance;
+  late int plannedFlightTime;
+
   late int loadFactor;
   late int loadFactorVariance;
 
   final blockFuelController = TextEditingController();
   final routeController = TextEditingController();
 
+  bool bidIsLoaded = false;
+
   @override
   void initState() {
     super.initState();
     blockFuelController.text = '0';
     _loadSettings();
-    vaUrlController.addListener(() {
-      vaUrlController.text;
-    });
-    apiKeyController.addListener(() {
-      apiKeyController.text;
-    });
 
     routeController.addListener(() {
       setState(() {}); // Update the UI
@@ -100,6 +104,12 @@ class _HomePageState extends State<HomePage> {
     _animationController?.removeListener(() {});
     _animationController?.dispose();
     _testFuture?.then((_) => null).catchError((_) => null);
+    apiKeyController.removeListener(() {});
+    vaUrlController.removeListener(() {});
+    apiKeyController.dispose();
+    vaUrlController.dispose();
+    blockFuelController.dispose();
+    routeController.dispose();
 
     super.dispose();
   }
@@ -138,9 +148,12 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadBids() async {
     WebComm webComm = WebComm();
-    webComm.getBids(vaUrlController.text, apiKeyController.text, context).then((
-      result,
-    ) async {
+    final result = await webComm.getBids(
+      vaUrlController.text,
+      apiKeyController.text,
+      context,
+    );
+    try {
       if (kDebugMode) {
         print('Result: $result');
       }
@@ -164,11 +177,25 @@ class _HomePageState extends State<HomePage> {
             loadFactor = result['flight']['load_factor'].toInt();
             loadFactorVariance = result['flight']['load_factor_variance']
                 .toInt();
+            airlineID = result['flight']['airline']['id'];
+            aircraftID = result['aircraft_id'];
+            flightID = result['flight_id'];
+            plannedDistance = result['flight']['distance']['nmi'];
+            plannedFlightTime = result['flight']['flight_time'];
           });
           generateRandomCounts(fares, loadFactor, loadFactorVariance);
+          if (flightNumber != null &&
+              depAirport != null &&
+              arrAirport != null) {
+            bidIsLoaded = true;
+          }
         }
       }
-    });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error processing response: $e');
+      }
+    }
   }
 
   Future<void> _clearBids() async {
@@ -183,6 +210,8 @@ class _HomePageState extends State<HomePage> {
       aircraftReg = null;
       fares = [];
       routeController.text = '';
+      blockFuelController.text = '0';
+      bidIsLoaded = false;
     });
   }
 
@@ -244,6 +273,24 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.end,
               mainAxisSize: MainAxisSize.max,
               children: [
+                _isLoading
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: ProgressRing(
+                          strokeWidth: 3,
+                          backgroundColor: Colors.grey,
+                        ),
+                      )
+                    : SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: ProgressRing(
+                          strokeWidth: 3,
+                          value: 0,
+                          backgroundColor: Colors.grey,
+                        ),
+                      ),
                 Button(
                   onPressed: _clearBids,
                   child: Row(
@@ -260,7 +307,19 @@ class _HomePageState extends State<HomePage> {
                       vaUrlController.text.isEmpty ||
                           apiKeyController.text.isEmpty
                       ? null
-                      : _loadBids,
+                      : () async {
+                          if (!_isLoading) {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                          }
+                          await _loadBids();
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                        },
                   child: Row(
                     children: [
                       Text('Refresh'),
@@ -274,6 +333,34 @@ class _HomePageState extends State<HomePage> {
                   style: ButtonStyle(
                     backgroundColor: WidgetStateProperty.all(Colors.green),
                   ),
+                  onPressed: bidIsLoaded
+                      ? () {
+                          Navigator.of(context, rootNavigator: true).push(
+                            FluentPageRoute(
+                              builder: (context) {
+                                return FlightLoadingPage(
+                                  vaUrlController: vaUrlController,
+                                  apiKeyController: apiKeyController,
+                                  airlineID: airlineID,
+                                  aircraftID: aircraftID,
+                                  flightNumber: flightNumber ?? '',
+                                  blockFuel: int.parse(
+                                    blockFuelController.text,
+                                  ),
+                                  depAirport: depAirport ?? '',
+                                  arrAirport: arrAirport ?? '',
+                                  route: routeController.text,
+                                  fares: fares,
+                                  weightUnit: weightUnit,
+                                  bidID: flightID ?? '',
+                                  plannedDistance: plannedDistance,
+                                  plannedFlightTime: plannedFlightTime,
+                                );
+                              },
+                            ),
+                          );
+                        }
+                      : null,
                   child: Row(
                     children: [
                       Text('Start flight'),
@@ -281,7 +368,6 @@ class _HomePageState extends State<HomePage> {
                       Icon(FluentIcons.chevron_right),
                     ],
                   ),
-                  onPressed: () {},
                 ),
                 SizedBox(width: 10),
               ],
@@ -598,18 +684,17 @@ class _HomePageState extends State<HomePage> {
                           .map(
                             (entry) => [
                               Expanded(
-                                child: NumberFormBox(
+                                child: NumberBox(
+                                  key: ValueKey(entry.key),
                                   mode: SpinButtonPlacementMode.inline,
                                   clearButton: false,
                                   min: 0,
                                   max: entry.value['capacity'],
-                                  value: entry.value['count'],
+                                  value: (entry.value['count'] as int?) ?? 0,
                                   onChanged: (value) {
-                                    // Handle the changed value
-                                    entry.value['count'] = value;
-                                    if (kDebugMode) {
-                                      print(fares);
-                                    }
+                                    setState(() {
+                                      entry.value['count'] = value ?? 0;
+                                    });
                                   },
                                 ),
                               ),

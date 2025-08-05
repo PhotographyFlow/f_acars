@@ -72,12 +72,17 @@ class _MyAppState extends State<MyApp> {
       theme: FluentThemeData(
         brightness: Brightness.dark,
         accentColor: Colors.blue,
-        //scaffoldBackgroundColor: Colors.transparent,
         navigationPaneTheme: NavigationPaneThemeData(
           backgroundColor: Colors.transparent,
         ),
       ),
       home: Navigation(onLocaleChanged: onLocaleChanged),
     );
+  }
+}
+
+class SetEffect {
+  static void setEffect(WindowEffect effect, BuildContext context) {
+    Window.setEffect(effect: effect, color: Colors.transparent, dark: true);
   }
 }
