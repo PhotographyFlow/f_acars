@@ -5,7 +5,6 @@ import 'package:f_acars/l10n/app_localizations.dart';
 
 class Navigation extends StatefulWidget {
   final Function(Locale) onLocaleChanged;
-
   const Navigation({super.key, required this.onLocaleChanged});
   @override
   State<Navigation> createState() => _NavigationState();
