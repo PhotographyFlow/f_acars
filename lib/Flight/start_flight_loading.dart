@@ -7,6 +7,8 @@ class FlightLoadingPage extends StatelessWidget {
   final TextEditingController apiKeyController;
   final int airlineID;
   final int aircraftID;
+  final String airlineIcao;
+  final String airlineIata;
   final String flightNumber;
   final int blockFuel;
   final String depAirport;
@@ -25,6 +27,8 @@ class FlightLoadingPage extends StatelessWidget {
     required this.apiKeyController,
     required this.airlineID,
     required this.aircraftID,
+    required this.airlineIcao,
+    required this.airlineIata,
     required this.flightNumber,
     required this.blockFuel,
     required this.depAirport,
@@ -68,7 +72,18 @@ class FlightLoadingPage extends StatelessWidget {
             Navigator.pushAndRemoveUntil(
               context,
               FluentPageRoute(
-                builder: (context) => FlightPage(flightID: flightID),
+                builder: (context) => FlightPage(
+                  flightID: flightID,
+                  airlineIcao: airlineIcao,
+                  airlineIata: airlineIata,
+                  flightNumber: flightNumber,
+                  depAirport: depAirport,
+                  arrAirport: arrAirport,
+                  blockFuel: blockFuel,
+                  weightUnit: weightUnit,
+                  route: route,
+                  fares: fares,
+                ),
               ),
               (route) => false,
             );
