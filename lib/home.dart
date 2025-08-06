@@ -9,6 +9,19 @@ import 'package:flutter/services.dart';
 import 'dart:math';
 import 'Flight/start_flight_loading.dart';
 
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
+    );
+  }
+}
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -60,6 +73,7 @@ class _HomePageState extends State<HomePage> {
   bool _isLoading = false;
 
   String? airlineIcao;
+  String? airlineIata;
   String? flightNumber;
   String? depAirport;
   String? arrAirport;
@@ -163,6 +177,7 @@ class _HomePageState extends State<HomePage> {
         if (mounted) {
           setState(() {
             airlineIcao = result['flight']['airline']['icao'];
+            airlineIata = result['flight']['airline']['iata'];
             flightNumber = result['flight']['flight_number'].toString();
             depAirport = result['flight']['dpt_airport_id'];
             arrAirport = result['flight']['arr_airport_id'];
@@ -201,6 +216,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _clearBids() async {
     setState(() {
       airlineIcao = null;
+      airlineIata = null;
       flightNumber = null;
       depAirport = null;
       arrAirport = null;
@@ -212,6 +228,13 @@ class _HomePageState extends State<HomePage> {
       routeController.text = '';
       blockFuelController.text = '0';
       bidIsLoaded = false;
+      loadFactor = 0;
+      loadFactorVariance = 0;
+      plannedDistance = 0;
+      plannedFlightTime = 0;
+      airlineID = 0;
+      aircraftID = 0;
+      flightID = null;
     });
   }
 
@@ -251,6 +274,12 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  //
+  //
+  //
+  //
+  //
+  // UI
   @override
   Widget build(BuildContext context) {
     return FluentTheme(
@@ -265,115 +294,112 @@ class _HomePageState extends State<HomePage> {
             style: FluentTheme.of(context).typography.title,
           ),
         ),
-        bottomBar: Column(
-          children: [
-            SizedBox(height: 15),
-            Row(
-              spacing: 10,
-              mainAxisAlignment: MainAxisAlignment.end,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                _isLoading
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: ProgressRing(
-                          strokeWidth: 3,
-                          backgroundColor: Colors.grey,
-                        ),
-                      )
-                    : SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: ProgressRing(
-                          strokeWidth: 3,
-                          value: 0,
-                          backgroundColor: Colors.grey,
-                        ),
+        bottomBar: Container(
+          padding: const EdgeInsets.only(top: 15.0, bottom: 15.0, left: 10.0),
+          child: Row(
+            spacing: 10,
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              _isLoading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: ProgressRing(
+                        strokeWidth: 3,
+                        backgroundColor: Colors.grey,
                       ),
-                Button(
-                  onPressed: _clearBids,
-                  child: Row(
-                    children: [
-                      Text('Clear'),
-                      SizedBox(width: 7),
-                      Icon(FluentIcons.clear),
-                    ],
-                  ),
+                    )
+                  : SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: ProgressRing(
+                        strokeWidth: 3,
+                        value: 0,
+                        backgroundColor: Colors.grey,
+                      ),
+                    ),
+              Button(
+                onPressed: _clearBids,
+                child: Row(
+                  children: [
+                    Text('Clear'),
+                    SizedBox(width: 7),
+                    Icon(FluentIcons.clear),
+                  ],
                 ),
+              ),
 
-                Button(
-                  onPressed:
-                      vaUrlController.text.isEmpty ||
-                          apiKeyController.text.isEmpty
-                      ? null
-                      : () async {
-                          if (!_isLoading) {
-                            setState(() {
-                              _isLoading = true;
-                            });
-                          }
-                          await _loadBids();
-                          if (mounted) {
-                            setState(() {
-                              _isLoading = false;
-                            });
-                          }
-                        },
-                  child: Row(
-                    children: [
-                      Text('Refresh'),
-                      SizedBox(width: 7),
-                      Icon(FluentIcons.refresh),
-                    ],
-                  ),
-                ),
-
-                Button(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(Colors.green),
-                  ),
-                  onPressed: bidIsLoaded
-                      ? () {
-                          Navigator.of(context, rootNavigator: true).push(
-                            FluentPageRoute(
-                              builder: (context) {
-                                return FlightLoadingPage(
-                                  vaUrlController: vaUrlController,
-                                  apiKeyController: apiKeyController,
-                                  airlineID: airlineID,
-                                  aircraftID: aircraftID,
-                                  flightNumber: flightNumber ?? '',
-                                  blockFuel: int.parse(
-                                    blockFuelController.text,
-                                  ),
-                                  depAirport: depAirport ?? '',
-                                  arrAirport: arrAirport ?? '',
-                                  route: routeController.text,
-                                  fares: fares,
-                                  weightUnit: weightUnit,
-                                  bidID: flightID ?? '',
-                                  plannedDistance: plannedDistance,
-                                  plannedFlightTime: plannedFlightTime,
-                                );
-                              },
-                            ),
-                          );
+              Button(
+                onPressed:
+                    vaUrlController.text.isEmpty ||
+                        apiKeyController.text.isEmpty
+                    ? null
+                    : () async {
+                        if (!_isLoading) {
+                          setState(() {
+                            _isLoading = true;
+                          });
                         }
-                      : null,
-                  child: Row(
-                    children: [
-                      Text('Start flight'),
-                      SizedBox(width: 5),
-                      Icon(FluentIcons.chevron_right),
-                    ],
-                  ),
+                        await _loadBids();
+                        if (mounted) {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      },
+                child: Row(
+                  children: [
+                    Text('Refresh'),
+                    SizedBox(width: 7),
+                    Icon(FluentIcons.refresh),
+                  ],
                 ),
-                SizedBox(width: 10),
-              ],
-            ),
-            SizedBox(height: 15),
-          ],
+              ),
+
+              Button(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(Colors.green),
+                ),
+                onPressed: bidIsLoaded
+                    ? () {
+                        Navigator.of(context, rootNavigator: true).push(
+                          FluentPageRoute(
+                            builder: (context) {
+                              return FlightLoadingPage(
+                                vaUrlController: vaUrlController,
+                                apiKeyController: apiKeyController,
+                                airlineID: airlineID,
+                                aircraftID: aircraftID,
+                                flightNumber: flightNumber ?? '',
+                                airlineIcao: airlineIcao ?? '',
+                                airlineIata: airlineIata ?? '',
+                                blockFuel: int.parse(blockFuelController.text),
+                                depAirport: depAirport ?? '',
+                                arrAirport: arrAirport ?? '',
+                                route: routeController.text,
+                                fares: fares,
+                                weightUnit: weightUnit,
+                                bidID: flightID ?? '',
+                                plannedDistance: plannedDistance,
+                                plannedFlightTime: plannedFlightTime,
+                              );
+                            },
+                          ),
+                        );
+                      }
+                    : null,
+                child: Row(
+                  children: [
+                    Text('Start flight'),
+                    SizedBox(width: 5),
+                    Icon(FluentIcons.chevron_right),
+                  ],
+                ),
+              ),
+              SizedBox(width: 10),
+            ],
+          ),
         ),
 
         // First row, flight infos
@@ -724,7 +750,11 @@ class _HomePageState extends State<HomePage> {
             children: [
               SizedBox(
                 height: 180.0,
-                child: TextBox(controller: routeController, maxLines: null),
+                child: TextBox(
+                  controller: routeController,
+                  maxLines: null,
+                  inputFormatters: [UpperCaseTextFormatter()],
+                ),
               ),
               Container(
                 decoration: BoxDecoration(
