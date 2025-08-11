@@ -1,7 +1,8 @@
 import 'package:f_acars/main.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:f_acars/Flight/display_flight_data.dart';
 
-class FlightPage extends StatefulWidget {
+class FlightPage extends StatelessWidget {
   final String flightID;
   final String airlineIcao;
   final String airlineIata;
@@ -12,6 +13,9 @@ class FlightPage extends StatefulWidget {
   final int weightUnit;
   final String route;
   final List<dynamic> fares;
+  final String apiKey;
+  final String vaUrl;
+
   const FlightPage({
     super.key,
     required this.flightID,
@@ -24,13 +28,10 @@ class FlightPage extends StatefulWidget {
     required this.weightUnit,
     required this.route,
     required this.fares,
+    required this.apiKey,
+    required this.vaUrl,
   });
 
-  @override
-  State<FlightPage> createState() => _FlightPageState();
-}
-
-class _FlightPageState extends State<FlightPage> {
   @override
   Widget build(BuildContext context) {
     return FluentTheme(
@@ -43,7 +44,7 @@ class _FlightPageState extends State<FlightPage> {
       child: ScaffoldPage.scrollable(
         header: PageHeader(
           title: Text(
-            '${widget.airlineIcao} / ${widget.airlineIata} ${widget.flightNumber}',
+            '$airlineIcao / $airlineIata $flightNumber',
             style: FluentTheme.of(context).typography.titleLarge,
           ),
         ),
@@ -99,14 +100,14 @@ class _FlightPageState extends State<FlightPage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  widget.depAirport,
+                                  depAirport,
                                   style: FluentTheme.of(
                                     context,
                                   ).typography.title,
                                 ),
                                 Icon(FluentIcons.airplane, size: 20.0),
                                 Text(
-                                  widget.arrAirport,
+                                  arrAirport,
                                   style: FluentTheme.of(
                                     context,
                                   ).typography.title,
@@ -116,7 +117,7 @@ class _FlightPageState extends State<FlightPage> {
 
                             //show block fuel
                             Text(
-                              'Block fuel:  ${widget.blockFuel}  ${widget.weightUnit == 1 ? 'kg' : 'lbs'}',
+                              'Block fuel:  $blockFuel  ${weightUnit == 1 ? 'kg' : 'lbs'}',
                               style: FluentTheme.of(
                                 context,
                               ).typography.subtitle,
@@ -182,7 +183,7 @@ class _FlightPageState extends State<FlightPage> {
                                     ),
                                   ],
                                 ),
-                                ...widget.fares.map((fare) {
+                                ...fares.map((fare) {
                                   return TableRow(
                                     children: [
                                       Container(
@@ -199,7 +200,7 @@ class _FlightPageState extends State<FlightPage> {
                                       ),
                                     ],
                                   );
-                                }).toList(),
+                                }),
                               ],
                             ),
 
@@ -233,36 +234,32 @@ class _FlightPageState extends State<FlightPage> {
                                     padding: EdgeInsets.all(5.0),
                                     child:
                                         //highlight airways, assume airways are contain numbers
-                                        //I think this is the best way so far :(
-                                        //Anyone have better way?
                                         Center(
                                           child: Text.rich(
                                             TextSpan(
-                                              children: widget.route
-                                                  .split(' ')
-                                                  .map((part) {
-                                                    if (part.contains(
-                                                      RegExp(r'\d'),
-                                                    )) {
-                                                      return TextSpan(
-                                                        text: '$part ',
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 15.0,
-                                                        ),
-                                                      );
-                                                    } else {
-                                                      return TextSpan(
-                                                        text: '$part ',
-                                                        style: TextStyle(
-                                                          color:
-                                                              Colors.grey[100],
-                                                          fontSize: 15.0,
-                                                        ),
-                                                      );
-                                                    }
-                                                  })
-                                                  .toList(),
+                                              children: route.split(' ').map((
+                                                part,
+                                              ) {
+                                                if (part.contains(
+                                                  RegExp(r'\d'),
+                                                )) {
+                                                  return TextSpan(
+                                                    text: '$part ',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 15.0,
+                                                    ),
+                                                  );
+                                                } else {
+                                                  return TextSpan(
+                                                    text: '$part ',
+                                                    style: TextStyle(
+                                                      color: Colors.grey[100],
+                                                      fontSize: 15.0,
+                                                    ),
+                                                  );
+                                                }
+                                              }).toList(),
                                             ),
                                           ),
                                         ),
@@ -277,7 +274,11 @@ class _FlightPageState extends State<FlightPage> {
                   ),
                 ),
 
-                Expanded(child: Column(children: [Text('Airspeed:N/A')])),
+                Expanded(
+                  child: Column(
+                    children: [FlightDataDisplay(vaUrl: vaUrl, apiKey: apiKey)],
+                  ),
+                ),
               ],
             ),
           ),

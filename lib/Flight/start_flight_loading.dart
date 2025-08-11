@@ -83,6 +83,8 @@ class FlightLoadingPage extends StatelessWidget {
                   weightUnit: weightUnit,
                   route: route,
                   fares: fares,
+                  vaUrl: vaUrlController.text,
+                  apiKey: apiKeyController.text,
                 ),
               ),
               (route) => false,
