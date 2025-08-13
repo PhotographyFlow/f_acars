@@ -209,11 +209,167 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get language;
 
+  /// Connection type setting
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Type'**
+  String get connectionType;
+
+  /// Connection type setting toop tip
+  ///
+  /// In en, this message translates to:
+  /// **'x64: For 64-bit simulators (e.g. P3Dv4+, MSFS)\nx32: For 32-bit simulators (e.g. P3Dv1-3, FSX)\nPlease make sure fsuipc is installed'**
+  String get connectionTypeTip;
+
   /// Weight unit setting
   ///
   /// In en, this message translates to:
   /// **'Weight Unit'**
   String get weightUnit;
+
+  /// Clear button
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// Refresh button
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// Start flight button
+  ///
+  /// In en, this message translates to:
+  /// **'Start flight'**
+  String get startFlight;
+
+  /// Airline label
+  ///
+  /// In en, this message translates to:
+  /// **'Airline'**
+  String get airline;
+
+  /// Flight number label
+  ///
+  /// In en, this message translates to:
+  /// **'Flight number'**
+  String get flightNumber;
+
+  /// DEP label
+  ///
+  /// In en, this message translates to:
+  /// **'DEP'**
+  String get dep;
+
+  /// ARR label
+  ///
+  /// In en, this message translates to:
+  /// **'ARR'**
+  String get arr;
+
+  /// Aircraft type label
+  ///
+  /// In en, this message translates to:
+  /// **'Aircraft type'**
+  String get aircraftType;
+
+  /// Aircraft ICAO code label
+  ///
+  /// In en, this message translates to:
+  /// **'Aircraft ICAO code'**
+  String get aircraftIcaoCode;
+
+  /// aircraft Name label
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get aircraftName;
+
+  /// Registration label
+  ///
+  /// In en, this message translates to:
+  /// **'Registration'**
+  String get registration;
+
+  /// Block fuel label
+  ///
+  /// In en, this message translates to:
+  /// **'Block fuel'**
+  String get blockFuel;
+
+  /// No fares available reminder
+  ///
+  /// In en, this message translates to:
+  /// **'No fares available'**
+  String get noFares;
+
+  /// Route label
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get route;
+
+  /// Prefiling pirep reminder
+  ///
+  /// In en, this message translates to:
+  /// **'Prefiling pirep, please wait...'**
+  String get prefiling;
+
+  /// Prefiling error pop up window
+  ///
+  /// In en, this message translates to:
+  /// **'There is an error occurred while prefiling. Please check your settings and internet connection.'**
+  String get prefilingError;
+
+  /// Error
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No bids found info bar title
+  ///
+  /// In en, this message translates to:
+  /// **'No bids found :('**
+  String get noBidsFoundTitle;
+
+  /// No bids found info bar message
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t find any bids. Check your settings and internet connection or add one bid at your VA website.'**
+  String get noBidsFound;
+
+  /// Back button
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// Quit button
+  ///
+  /// In en, this message translates to:
+  /// **'Quit'**
+  String get quit;
+
+  /// Fare table title
+  ///
+  /// In en, this message translates to:
+  /// **'Fares'**
+  String get fares;
+
+  /// Fare table fare code
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get code;
+
+  /// Fare table fare count
+  ///
+  /// In en, this message translates to:
+  /// **'Count'**
+  String get count;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

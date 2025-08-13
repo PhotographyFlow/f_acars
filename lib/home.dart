@@ -70,6 +70,7 @@ class _HomePageState extends State<HomePage> {
   final apiKeyController = TextEditingController();
   final vaUrlController = TextEditingController();
   int weightUnit = 0; // 0=lbs, 1=kg
+  int connectionType = 0; // 0=x64, 1=x32
   bool _isLoading = false;
 
   String? airlineIcao;
@@ -245,6 +246,7 @@ class _HomePageState extends State<HomePage> {
       vaUrlController.text = jsonSettings['vaUrl'] ?? '';
       apiKeyController.text = jsonSettings['apiKey'] ?? '';
       weightUnit = jsonSettings['weightUnit'] ?? 0;
+      connectionType = jsonSettings['connectionType'] ?? 0;
       setState(() {});
 
       if (kDebugMode) {
@@ -323,7 +325,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: _clearBids,
                 child: Row(
                   children: [
-                    Text('Clear'),
+                    Text(AppLocalizations.of(context)!.clear),
                     SizedBox(width: 7),
                     Icon(FluentIcons.clear),
                   ],
@@ -350,7 +352,7 @@ class _HomePageState extends State<HomePage> {
                       },
                 child: Row(
                   children: [
-                    Text('Refresh'),
+                    Text(AppLocalizations.of(context)!.refresh),
                     SizedBox(width: 7),
                     Icon(FluentIcons.refresh),
                   ],
@@ -380,6 +382,7 @@ class _HomePageState extends State<HomePage> {
                                 route: routeController.text,
                                 fares: fares,
                                 weightUnit: weightUnit,
+                                connectionType: connectionType,
                                 bidID: flightID ?? '',
                                 plannedDistance: plannedDistance,
                                 plannedFlightTime: plannedFlightTime,
@@ -391,7 +394,7 @@ class _HomePageState extends State<HomePage> {
                     : null,
                 child: Row(
                   children: [
-                    Text('Start flight'),
+                    Text(AppLocalizations.of(context)!.startFlight),
                     SizedBox(width: 5),
                     Icon(FluentIcons.chevron_right),
                   ],
@@ -413,7 +416,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   spacing: 5.0,
                   children: [
-                    Text('Airline'),
+                    Text(AppLocalizations.of(context)!.airline),
                     TextBox(
                       enabled: false,
                       readOnly: true,
@@ -432,7 +435,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   spacing: 5.0,
                   children: [
-                    Text('Flight number'),
+                    Text(AppLocalizations.of(context)!.flightNumber),
                     TextBox(
                       enabled: false,
                       readOnly: true,
@@ -451,7 +454,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   spacing: 5.0,
                   children: [
-                    Text('DEP'),
+                    Text(AppLocalizations.of(context)!.dep),
                     TextBox(
                       enabled: false,
                       readOnly: true,
@@ -470,7 +473,7 @@ class _HomePageState extends State<HomePage> {
                 spacing: 5.0,
                 children: [
                   const Text(''), // empty Text widget to match height
-                  Icon(FluentIcons.airplane, size: 20.0),
+                  const Icon(FluentIcons.airplane, size: 20.0),
                 ],
               ),
 
@@ -478,7 +481,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   spacing: 5.0,
                   children: [
-                    Text('ARR'),
+                    Text(AppLocalizations.of(context)!.arr),
                     TextBox(
                       enabled: false,
                       readOnly: true,
@@ -504,7 +507,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   spacing: 5.0,
                   children: [
-                    Text('Aircraft type'),
+                    Text(AppLocalizations.of(context)!.aircraftType),
                     TextBox(
                       enabled: false,
                       readOnly: true,
@@ -524,7 +527,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   spacing: 5.0,
                   children: [
-                    Text('Aircraft icao code'),
+                    Text(AppLocalizations.of(context)!.aircraftIcaoCode),
                     TextBox(
                       enabled: false,
                       readOnly: true,
@@ -544,7 +547,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   spacing: 5.0,
                   children: [
-                    Text('Name'),
+                    Text(AppLocalizations.of(context)!.aircraftName),
                     TextBox(
                       enabled: false,
                       readOnly: true,
@@ -564,7 +567,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   spacing: 5.0,
                   children: [
-                    Text('Registration'),
+                    Text(AppLocalizations.of(context)!.registration),
                     TextBox(
                       enabled: false,
                       readOnly: true,
@@ -584,7 +587,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   spacing: 5.0,
                   children: [
-                    Text('Block fuel'),
+                    Text(AppLocalizations.of(context)!.blockFuel),
                     TextBox(
                       style: TextStyle(fontSize: 24.0),
                       textAlign: TextAlign.center,
@@ -690,7 +693,7 @@ class _HomePageState extends State<HomePage> {
                             maxLines: 2,
                             readOnly: true,
                             enabled: false,
-                            placeholder: 'No fares available',
+                            placeholder: AppLocalizations.of(context)!.noFares,
                             style: TextStyle(
                               fontFamily: 'Arial',
                               fontSize: 24.0,
@@ -743,7 +746,7 @@ class _HomePageState extends State<HomePage> {
           SizedBox(height: 20.0),
 
           //route
-          Text('Route'),
+          Text(AppLocalizations.of(context)!.route),
           SizedBox(height: 10.0),
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -1,5 +1,6 @@
 import 'package:f_acars/main.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:f_acars/l10n/app_localizations.dart';
 import 'package:f_acars/Flight/display_flight_data.dart';
 
 class FlightPage extends StatelessWidget {
@@ -11,6 +12,7 @@ class FlightPage extends StatelessWidget {
   final String arrAirport;
   final int blockFuel;
   final int weightUnit;
+  final int connectionType;
   final String route;
   final List<dynamic> fares;
   final String apiKey;
@@ -26,6 +28,7 @@ class FlightPage extends StatelessWidget {
     required this.arrAirport,
     required this.blockFuel,
     required this.weightUnit,
+    required this.connectionType,
     required this.route,
     required this.fares,
     required this.apiKey,
@@ -56,7 +59,10 @@ class FlightPage extends StatelessWidget {
               child: Button(
                 child: Row(
                   spacing: 7,
-                  children: [Text('Quit'), Icon(FluentIcons.clear)],
+                  children: [
+                    Text(AppLocalizations.of(context)!.quit),
+                    Icon(FluentIcons.clear),
+                  ],
                 ),
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
@@ -117,14 +123,14 @@ class FlightPage extends StatelessWidget {
 
                             //show block fuel
                             Text(
-                              'Block fuel:  $blockFuel  ${weightUnit == 1 ? 'kg' : 'lbs'}',
+                              '${AppLocalizations.of(context)!.blockFuel}  $blockFuel  ${weightUnit == 1 ? 'kg' : 'lbs'}',
                               style: FluentTheme.of(
                                 context,
                               ).typography.subtitle,
                             ),
 
                             Text(
-                              'Fares:',
+                              AppLocalizations.of(context)!.fares,
                               style: FluentTheme.of(
                                 context,
                               ).typography.subtitle,
@@ -157,7 +163,9 @@ class FlightPage extends StatelessWidget {
                                     Container(
                                       padding: EdgeInsets.all(7.0),
                                       child: Text(
-                                        'Name',
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.aircraftName, //just use name, same
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -166,7 +174,7 @@ class FlightPage extends StatelessWidget {
                                     Container(
                                       padding: EdgeInsets.all(7.0),
                                       child: Text(
-                                        'Code',
+                                        AppLocalizations.of(context)!.code,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -175,7 +183,7 @@ class FlightPage extends StatelessWidget {
                                     Container(
                                       padding: EdgeInsets.all(7.0),
                                       child: Text(
-                                        'Count',
+                                        AppLocalizations.of(context)!.count,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -205,7 +213,7 @@ class FlightPage extends StatelessWidget {
                             ),
 
                             Text(
-                              'Route:',
+                              AppLocalizations.of(context)!.route,
                               style: FluentTheme.of(
                                 context,
                               ).typography.subtitle,
@@ -276,7 +284,14 @@ class FlightPage extends StatelessWidget {
 
                 Expanded(
                   child: Column(
-                    children: [FlightDataDisplay(vaUrl: vaUrl, apiKey: apiKey)],
+                    children: [
+                      FlightDataDisplay(
+                        vaUrl: vaUrl,
+                        apiKey: apiKey,
+                        pirepID: flightID,
+                        connectionType: connectionType,
+                      ),
+                    ],
                   ),
                 ),
               ],

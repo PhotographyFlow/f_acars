@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'flight.dart';
 import 'package:f_acars/web_comm.dart';
+import 'package:f_acars/l10n/app_localizations.dart';
 
 class FlightLoadingPage extends StatelessWidget {
   final TextEditingController vaUrlController;
@@ -20,6 +21,7 @@ class FlightLoadingPage extends StatelessWidget {
   final int plannedFlightTime;
 
   final int weightUnit;
+  final int connectionType;
 
   const FlightLoadingPage({
     super.key,
@@ -40,6 +42,7 @@ class FlightLoadingPage extends StatelessWidget {
     required this.plannedFlightTime,
 
     required this.weightUnit,
+    required this.connectionType,
   });
 
   @override
@@ -81,6 +84,7 @@ class FlightLoadingPage extends StatelessWidget {
                   arrAirport: arrAirport,
                   blockFuel: blockFuel,
                   weightUnit: weightUnit,
+                  connectionType: connectionType,
                   route: route,
                   fares: fares,
                   vaUrl: vaUrlController.text,
@@ -96,7 +100,7 @@ class FlightLoadingPage extends StatelessWidget {
       spacing: 20,
       children: [
         SizedBox(height: 50, width: 50, child: ProgressRing()),
-        Text('Prefiling pirep, please wait...'),
+        Text(AppLocalizations.of(context)!.prefiling),
       ],
     );
   }

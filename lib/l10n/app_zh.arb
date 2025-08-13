@@ -96,8 +96,138 @@
     "description": "Language setting"
   },
 
+  "connectionType": "连接方式",
+  "@connectionType": {
+    "description": "Connection type setting"
+  },
+
+  "connectionTypeTip": "x64: 适用于64位模拟器 (如 P3Dv4+, MSFS)\nx32: 适用于32位模拟器 (如 P3Dv1-3, FSX)\n请确保fsuipc已安装",
+  "@connectionTypeTip": {
+    "description": "Connection type setting toop tip"
+  },
+
   "weightUnit": "重量单位",
   "@weightUnit": {
     "description": "Weight unit setting"
+  },
+
+  "clear": "清除",
+  "@clear": {
+    "description": "Clear button"
+  },
+
+  "refresh": "刷新",
+  "@refresh": {
+    "description": "Refresh button"
+  },
+
+  "startFlight": "开始飞行",
+  "@startFlight": {
+    "description": "Start flight button"
+  },
+
+  "airline": "航空公司",
+  "@airline": {
+    "description": "Airline label"
+  },
+
+  "flightNumber": "航班号",
+  "@flightNumber": {
+    "description": "Flight number label"
+  },
+
+  "dep": "起飞机场",
+  "@dep": {
+    "description": "DEP label"
+  },
+
+  "arr": "落地机场",
+  "@arr": {
+    "description": "ARR label"
+  },
+
+  "aircraftType": "飞机型号",
+  "@aircraftType": {
+    "description": "Aircraft type label"
+  },
+
+  "aircraftIcaoCode": "飞机ICAO代码",
+  "@aircraftIcaoCode": {
+    "description": "Aircraft ICAO code label"
+  },
+
+  "aircraftName": "名字",
+  "@aircraftName": {
+    "description": "aircraft Name label"
+  },
+
+  "registration": "注册号",
+  "@registration": {
+    "description": "Registration label"
+  },
+
+  "blockFuel": "轮挡油量",
+  "@blockFuel": {
+    "description": "Block fuel label"
+  },
+
+  "noFares": "无配载数据",
+  "@noFares": {
+    "description": "No fares available reminder"
+  },
+
+  "route": "航路",
+  "@route": {
+    "description": "Route label"
+  },
+
+  "prefiling": "上传航班计划中, 请坐和放宽...",
+  "@prefiling": {
+    "description": "Prefiling pirep reminder"
+  },
+
+  "prefilingError": "上传航班计划时发生错误，请检查您的设置和网络连接。",
+  "@prefilingError": {
+    "description": "Prefiling error pop up window"
+  },
+
+  "error": "错误",
+  "@error": {
+    "description": "Error"
+  },
+
+  "noBidsFoundTitle": "找不到航班 :(",
+  "@noBidsFoundTitle": {
+    "description": "No bids found info bar title"
+  },
+
+  "noBidsFound": "找不到任何航班，检查您的设置和网络连接，或在 VA 网站预定一个航班。",
+  "@noBidsFound": {
+    "description": "No bids found info bar message"
+  },
+
+  "back": "返回",
+  "@back": {
+    "description": "Back button"
+  },
+
+  "quit": "退出",
+  "@quit": {
+    "description": "Quit button"
+  },
+
+  "fares": "配载",
+  "@fares": {
+    "description": "Fare table title"
+  },
+
+  "code": "代码",
+  "@code": {
+    "description": "Fare table fare code"
+  },
+
+  "count": "数量",
+  "@count": {
+    "description": "Fare table fare count"
   }
 }

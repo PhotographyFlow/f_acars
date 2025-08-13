@@ -96,8 +96,138 @@
     "description": "Language setting"
   },
 
+  "connectionType": "Connection Type",
+  "@connectionType": {
+    "description": "Connection type setting"
+  },
+
+  "connectionTypeTip": "x64: For 64-bit simulators (e.g. P3Dv4+, MSFS)\nx32: For 32-bit simulators (e.g. P3Dv1-3, FSX)\nPlease make sure fsuipc is installed",
+  "@connectionTypeTip": {
+    "description": "Connection type setting toop tip"
+  },
+
   "weightUnit": "Weight Unit",
   "@weightUnit": {
     "description": "Weight unit setting"
+  },
+
+  "clear": "Clear",
+  "@clear": {
+    "description": "Clear button"
+  },
+
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Refresh button"
+  },
+
+  "startFlight": "Start flight",
+  "@startFlight": {
+    "description": "Start flight button"
+  },
+
+  "airline": "Airline",
+  "@airline": {
+    "description": "Airline label"
+  },
+
+  "flightNumber": "Flight number",
+  "@flightNumber": {
+    "description": "Flight number label"
+  },
+
+  "dep": "DEP",
+  "@dep": {
+    "description": "DEP label"
+  },
+
+  "arr": "ARR",
+  "@arr": {
+    "description": "ARR label"
+  },
+
+  "aircraftType": "Aircraft type",
+  "@aircraftType": {
+    "description": "Aircraft type label"
+  },
+
+  "aircraftIcaoCode": "Aircraft ICAO code",
+  "@aircraftIcaoCode": {
+    "description": "Aircraft ICAO code label"
+  },
+
+  "aircraftName": "Name",
+  "@aircraftName": {
+    "description": "aircraft Name label"
+  },
+
+  "registration": "Registration",
+  "@registration": {
+    "description": "Registration label"
+  },
+
+  "blockFuel": "Block fuel",
+  "@blockFuel": {
+    "description": "Block fuel label"
+  },
+
+  "noFares": "No fares available",
+  "@noFares": {
+    "description": "No fares available reminder"
+  },
+
+  "route": "Route",
+  "@route": {
+    "description": "Route label"
+  },
+
+  "prefiling": "Prefiling pirep, please wait...",
+  "@prefiling": {
+    "description": "Prefiling pirep reminder"
+  },
+
+  "prefilingError": "There is an error occurred while prefiling. Please check your settings and internet connection.",
+  "@prefilingError": {
+    "description": "Prefiling error pop up window"
+  },
+
+  "error": "Error",
+  "@error": {
+    "description": "Error"
+  },
+
+  "noBidsFoundTitle": "No bids found :(",
+  "@noBidsFoundTitle": {
+    "description": "No bids found info bar title"
+  },
+
+  "noBidsFound": "Couldn't find any bids. Check your settings and internet connection or add one bid at your VA website.",
+  "@noBidsFound": {
+    "description": "No bids found info bar message"
+  },
+
+  "back": "Back",
+  "@back": {
+    "description": "Back button"
+  },
+
+  "quit": "Quit",
+  "@quit": {
+    "description": "Quit button"
+  },
+
+  "fares": "Fares",
+  "@fares": {
+    "description": "Fare table title"
+  },
+
+  "code": "Code",
+  "@code": {
+    "description": "Fare table fare code"
+  },
+
+  "count": "Count",
+  "@count": {
+    "description": "Fare table fare count"
   }
 }

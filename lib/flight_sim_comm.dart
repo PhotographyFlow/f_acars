@@ -20,7 +20,7 @@ class FlightSimComm {
           "apiVersion": "1.0",
           "dataQueries": [
             {
-              "name": "AIRSPEED INDICATED (knots mult.ed by. 128)",
+              "name": "AIRSPEED INDICATED (knots multed by 128)",
               "offset": "  0x02BC",
               "size": 4,
               "targetType": "int32",
@@ -38,7 +38,7 @@ class FlightSimComm {
               "targetType": "float64",
             },
             {
-              "name": " Radio altitude (metres)",
+              "name": " Radio altitude (m)",
               "offset": "0x31E4",
               "size": 4,
               "targetType": "int32",
@@ -61,48 +61,120 @@ class FlightSimComm {
               "size": 4,
               "targetType": "int32",
             },
+            {
+              "name": "TRUE heading",
+              "offset": "0x0580",
+              "size": 4,
+              "targetType": "int32",
+            },
+            {
+              "name": "Zulu year",
+              "offset": "0x0240",
+              "size": 2,
+              "targetType": "int16",
+            },
+            {
+              "name": "Zulu month",
+              "offset": "0x0242",
+              "size": 1,
+              "targetType": "int8",
+            },
+            {
+              "name": "Zulu day",
+              "offset": "0x023D",
+              "size": 1,
+              "targetType": "int8",
+            },
+            {
+              "name": "Zulu hour",
+              "offset": "0x023B",
+              "size": 1,
+              "targetType": "int8",
+            },
+            {
+              "name": "Zulu minute",
+              "offset": "0x023C",
+              "size": 1,
+              "targetType": "int8",
+            },
+            {
+              "name": "Zulu second",
+              "offset": "0x023A",
+              "size": 1,
+              "targetType": "int8",
+            },
           ],
         }),
       );
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
         final responseData = responseBody['dataResults'];
+        /*
         if (kDebugMode) {
           print(responseData);
         }
-        final airspeed = (((responseData[0]['convertedValue']) ?? 0) / 128)
-            .toInt();
-        final groundSpeed =
-            (((responseData[1]['convertedValue']) ?? 0.0) * 1.94)
-                .toInt(); //conveted from m/s to knots
-        final altCalibrated = ((responseData[2]['convertedValue']) ?? 0.0)
-            .toInt();
-        final radioAltitude =
-            (((responseData[3]['convertedValue']) ?? 0) / 65536).toInt();
-        final gpsLat = double.parse(
-          (responseData[4]['convertedValue'] ?? 0.0).toStringAsFixed(4),
-        );
-        final gpsLon = double.parse(
-          (responseData[5]['convertedValue'] ?? 0.0).toStringAsFixed(4),
-        );
-        final totalFuel = (responseData[6]['convertedValue']) ?? 0;
-        return {
-          'airspeed': airspeed,
-          'groundSpeed': groundSpeed,
-          'altCalibrated': altCalibrated,
-          'radioAltitude': radioAltitude,
-          'gpsLat': gpsLat,
-          'gpsLon': gpsLon,
-          'totalFuel': totalFuel,
-        };
+        */
+        final String isSucceeded = responseBody['status'] ?? 'failed';
+        if (isSucceeded == 'success') {
+          final airspeed = (((responseData[0]['convertedValue']) ?? 0) / 128)
+              .toInt();
+          final groundSpeed =
+              (((responseData[1]['convertedValue']) ?? 0.0) * 1.94)
+                  .toInt(); //conveted from m/s to knots
+          final altCalibrated =
+              (((responseData[2]['convertedValue']) ?? 0.0) * 3.28).toInt();
+          final radioAltitude =
+              ((((responseData[3]['convertedValue']) ?? 0) / 65536) * 3.28)
+                  .toInt();
+          final gpsLat = double.parse(
+            (responseData[4]['convertedValue'] ?? 0.0).toStringAsFixed(4),
+          );
+          final gpsLon = double.parse(
+            (responseData[5]['convertedValue'] ?? 0.0).toStringAsFixed(4),
+          );
+          final totalFuel = (responseData[6]['convertedValue']) ?? 0;
+          final trueHeading =
+              (((((responseData[7]['convertedValue']) ?? 0) * 360) /
+                          (65536 * 65536))
+                      .toInt() +
+                  360) %
+              360;
+          final zuluYear = (responseData[8]['convertedValue']) ?? 0;
+          final zuluMonth = (responseData[9]['convertedValue']) ?? 0;
+          final zuluDay = (responseData[10]['convertedValue']) ?? 0;
+          final zuluHour = (responseData[11]['convertedValue']) ?? 0;
+          final zuluMinute = (responseData[12]['convertedValue']) ?? 0;
+          final zuluSecond = (responseData[13]['convertedValue']) ?? 0;
+
+          return {
+            'airspeed': airspeed,
+            'groundSpeed': groundSpeed,
+            'altCalibrated': altCalibrated,
+            'radioAltitude': radioAltitude,
+            'gpsLat': gpsLat,
+            'gpsLon': gpsLon,
+            'totalFuel': totalFuel,
+            'trueHeading': trueHeading,
+            'zuluYear': zuluYear,
+            'zuluMonth': zuluMonth,
+            'zuluDay': zuluDay,
+            'zuluHour': zuluHour,
+            'zuluMinute': zuluMinute,
+            'zuluSecond': zuluSecond,
+          };
+        } else {
+          throw Exception(
+            'Failed to get flight data.Cannot connect to the game.',
+          );
+        }
       }
     } catch (e) {
       if (kDebugMode) {
         print(e);
-        if (context.mounted) {
-          onError?.call();
-          showConnectionError(context, e, onRetry);
-        }
+      }
+      if (context.mounted) {
+        onError?.call();
+        showConnectionError(context, e, onRetry);
       }
     }
   }

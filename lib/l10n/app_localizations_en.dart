@@ -66,5 +66,83 @@ class AppLocalizationsEn extends AppLocalizations {
   String get language => 'Language';
 
   @override
+  String get connectionType => 'Connection Type';
+
+  @override
+  String get connectionTypeTip => 'x64: For 64-bit simulators (e.g. P3Dv4+, MSFS)\nx32: For 32-bit simulators (e.g. P3Dv1-3, FSX)\nPlease make sure fsuipc is installed';
+
+  @override
   String get weightUnit => 'Weight Unit';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get startFlight => 'Start flight';
+
+  @override
+  String get airline => 'Airline';
+
+  @override
+  String get flightNumber => 'Flight number';
+
+  @override
+  String get dep => 'DEP';
+
+  @override
+  String get arr => 'ARR';
+
+  @override
+  String get aircraftType => 'Aircraft type';
+
+  @override
+  String get aircraftIcaoCode => 'Aircraft ICAO code';
+
+  @override
+  String get aircraftName => 'Name';
+
+  @override
+  String get registration => 'Registration';
+
+  @override
+  String get blockFuel => 'Block fuel';
+
+  @override
+  String get noFares => 'No fares available';
+
+  @override
+  String get route => 'Route';
+
+  @override
+  String get prefiling => 'Prefiling pirep, please wait...';
+
+  @override
+  String get prefilingError => 'There is an error occurred while prefiling. Please check your settings and internet connection.';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get noBidsFoundTitle => 'No bids found :(';
+
+  @override
+  String get noBidsFound => 'Couldn\'t find any bids. Check your settings and internet connection or add one bid at your VA website.';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get quit => 'Quit';
+
+  @override
+  String get fares => 'Fares';
+
+  @override
+  String get code => 'Code';
+
+  @override
+  String get count => 'Count';
 }
