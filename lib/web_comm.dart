@@ -287,9 +287,7 @@ class WebComm {
         print(response.body);
       }
     } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+      return e;
     }
   }
 }

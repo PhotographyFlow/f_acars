@@ -152,11 +152,6 @@ class FlightSimComm {
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
         final responseData = responseBody['dataResults'];
-        /*
-        if (kDebugMode) {
-          print(responseData);
-        }
-        */
         final String isSucceeded = responseBody['status'] ?? 'failed';
         if (isSucceeded == 'success') {
           final airspeed = (((responseData[0]['convertedValue']) ?? 0) / 128)
@@ -188,14 +183,14 @@ class FlightSimComm {
           final zuluHour = (responseData[11]['convertedValue']) ?? 0;
           final zuluMinute = (responseData[12]['convertedValue']) ?? 0;
           final zuluSecond = (responseData[13]['convertedValue']) ?? 0;
-          final isOnGround = (responseData[14]['convertedValue']) ?? 0;
+          final isOnGround = (responseData[14]['convertedValue'] ?? 0) != 0;
           final eng1On = (responseData[15]['convertedValue']) ?? 0;
           final eng2On = (responseData[16]['convertedValue']) ?? 0;
           final eng3On = (responseData[17]['convertedValue']) ?? 0;
           final eng4On = (responseData[18]['convertedValue']) ?? 0;
           final bool isEngOn =
               eng1On == 1 || eng2On == 1 || eng3On == 1 || eng4On == 1;
-
+          /*
           if (radioAltitude < 200 && context.mounted) {
             recorder.start(context);
           }
@@ -207,6 +202,14 @@ class FlightSimComm {
               'maxLandingVS: ${LandingDataRecorder.landingVS}, maxLandingG: ${LandingDataRecorder.landingG}',
             );
           }
+*/
+
+          FlightStatusUpdate.updateStatus(
+            groundSpeed,
+            radioAltitude,
+            isEngOn,
+            isOnGround,
+          );
 
           return {
             'airspeed': airspeed,
@@ -229,8 +232,12 @@ class FlightSimComm {
             'eng3On': eng3On,
             'eng4On': eng4On,
             'isEngOn': isEngOn,
-            'landingVS': LandingDataRecorder.landingVS,
-            'landingG': LandingDataRecorder.landingG,
+            'landingVS': 0, // LandingDataRecorder.landingVS,
+            'landingG': 0.0, // LandingDataRecorder.landingG,
+            'flightStatus': (FlightStatusUpdate.currentStatus)
+                .toString()
+                .split('.')
+                .last,
           };
         } else {
           throw Exception(
@@ -248,51 +255,6 @@ class FlightSimComm {
       }
     }
   }
-}
-
-void showConnectionError(BuildContext context, e, VoidCallback? onRetry) async {
-  await showDialog<String>(
-    context: context,
-    builder: (context) => ContentDialog(
-      title: const Text('Connection error!'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 10,
-        children: [
-          Text(
-            'There is an error occurred while get data and send to the server.',
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: FluentTheme.of(
-                context,
-              ).resources.controlStrokeColorSecondary,
-              borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(
-                color: FluentTheme.of(
-                  context,
-                ).resources.controlStrokeColorSecondary,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(7.0),
-              child: Text(e.toString()),
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        Button(
-          child: const Text('Retry'),
-          onPressed: () {
-            Navigator.pop(context);
-            onRetry?.call();
-          },
-        ),
-      ],
-    ),
-  );
 }
 
 class LandingDataRecorder {
@@ -355,11 +317,15 @@ class LandingDataRecorder {
               );
               if (landingVSNew < landingVS) {
                 landingVS = landingVSNew;
-                print('landingVS: $landingVS');
+                if (kDebugMode) {
+                  print('landingVS: $landingVS');
+                }
               }
               if (landingGNew > landingG) {
                 landingG = landingGNew;
-                print('landingG: $landingG');
+                if (kDebugMode) {
+                  print('landingG: $landingG');
+                }
               }
             }
           }
@@ -383,4 +349,123 @@ class LandingDataRecorder {
       _timer?.cancel();
     }
   }
+}
+
+//
+//
+//Flight Status update
+enum FlightStatus {
+  INI, // initiated
+  BST, // boarding
+  TXI, // taxi
+  TOF, // takeoff
+  ICL, // initial climb
+  ENR, // enroute
+  TEN, // approach
+  LDG, // landing
+  LAN, // landed
+  ARR, // arrived
+  PSD, // paused
+}
+
+class FlightStatusUpdate {
+  static FlightStatus currentStatus = FlightStatus.INI;
+
+  static void updateStatus(int gs, int ra, bool isEngOn, bool onGround) {
+    switch (currentStatus) {
+      case FlightStatus.INI:
+        currentStatus = FlightStatus.BST;
+        break;
+      case FlightStatus.BST:
+        if (isEngOn && gs > 5) {
+          currentStatus = FlightStatus.TXI;
+        }
+        break;
+      case FlightStatus.TXI:
+        if (gs > 45 && onGround) {
+          currentStatus = FlightStatus.TOF;
+        }
+        break;
+      case FlightStatus.TOF:
+        if (!onGround && gs > 80) {
+          currentStatus = FlightStatus.ICL;
+        }
+        break;
+      case FlightStatus.ICL:
+        if (ra > 5000) {
+          currentStatus = FlightStatus.ENR;
+        }
+        break;
+      case FlightStatus.ENR:
+        if (ra < 4000) {
+          currentStatus = FlightStatus.TEN;
+        }
+        break;
+      case FlightStatus.TEN:
+        if (ra < 2500) {
+          currentStatus = FlightStatus.LDG;
+        }
+        break;
+      case FlightStatus.LDG:
+        if (onGround && gs < 80) {
+          currentStatus = FlightStatus.LAN;
+        }
+        break;
+      case FlightStatus.LAN:
+        if (!isEngOn && gs == 0) {
+          currentStatus = FlightStatus.ARR;
+        }
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+//
+//
+//
+void showConnectionError(BuildContext context, e, VoidCallback? onRetry) async {
+  await showDialog<String>(
+    context: context,
+    builder: (context) => ContentDialog(
+      title: const Text('Connection error!'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 10,
+        children: [
+          Text(
+            'There is an error occurred while get data and send to the server.',
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: FluentTheme.of(
+                context,
+              ).resources.controlStrokeColorSecondary,
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(
+                color: FluentTheme.of(
+                  context,
+                ).resources.controlStrokeColorSecondary,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(7.0),
+              child: Text(e.toString()),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        Button(
+          child: const Text('Retry'),
+          onPressed: () {
+            Navigator.pop(context);
+            onRetry?.call();
+          },
+        ),
+      ],
+    ),
+  );
 }

@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'flight.dart';
 import 'package:f_acars/web_comm.dart';
 import 'package:f_acars/l10n/app_localizations.dart';
+import 'package:f_acars/flight_sim_comm.dart';
 
 class FlightLoadingPage extends StatelessWidget {
   final TextEditingController vaUrlController;
@@ -70,6 +71,7 @@ class FlightLoadingPage extends StatelessWidget {
           fares,
         )
         .then((result) {
+          FlightStatusUpdate.currentStatus = FlightStatus.INI;
           String flightID = result?['id'] ?? 'null';
           if (flightID != 'null') {
             Navigator.pushAndRemoveUntil(
