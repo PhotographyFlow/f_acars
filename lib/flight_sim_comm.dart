@@ -6,6 +6,7 @@ import 'dart:async';
 
 class FlightSimComm {
   final String flightSimUrl = 'http://localhost:8000';
+  final recorder = LandingDataRecorder();
 
   Future getFlightData(
     BuildContext context, {
@@ -103,6 +104,48 @@ class FlightSimComm {
               "size": 1,
               "targetType": "int8",
             },
+            {
+              "name": "Aircraft on ground flag",
+              "offset": "0x0366",
+              "size": 2,
+              "targetType": "int16",
+            },
+            {
+              "name": "Eng1 on flag",
+              "offset": "0x0894",
+              "size": 2,
+              "targetType": "int16",
+            },
+            {
+              "name": "Eng2 on flag",
+              "offset": "0x092C",
+              "size": 2,
+              "targetType": "int16",
+            },
+            {
+              "name": "Eng3 on flag",
+              "offset": "0x09C4",
+              "size": 2,
+              "targetType": "int16",
+            },
+            {
+              "name": "Eng4 on flag",
+              "offset": "0x0A5C",
+              "size": 2,
+              "targetType": "int16",
+            },
+            {
+              "name": "Landing V/S (mps)",
+              "offset": "0x030C",
+              "size": 4,
+              "targetType": "int32",
+            },
+            {
+              "name": "Landing G (*624)",
+              "offset": "0x11B8",
+              "size": 2,
+              "targetType": "int16",
+            },
           ],
         }),
       );
@@ -145,6 +188,25 @@ class FlightSimComm {
           final zuluHour = (responseData[11]['convertedValue']) ?? 0;
           final zuluMinute = (responseData[12]['convertedValue']) ?? 0;
           final zuluSecond = (responseData[13]['convertedValue']) ?? 0;
+          final isOnGround = (responseData[14]['convertedValue']) ?? 0;
+          final eng1On = (responseData[15]['convertedValue']) ?? 0;
+          final eng2On = (responseData[16]['convertedValue']) ?? 0;
+          final eng3On = (responseData[17]['convertedValue']) ?? 0;
+          final eng4On = (responseData[18]['convertedValue']) ?? 0;
+          final bool isEngOn =
+              eng1On == 1 || eng2On == 1 || eng3On == 1 || eng4On == 1;
+
+          if (radioAltitude < 200 && context.mounted) {
+            recorder.start(context);
+          }
+          if (radioAltitude > 200) {
+            recorder.stop();
+          }
+          if (kDebugMode) {
+            print(
+              'maxLandingVS: ${LandingDataRecorder.landingVS}, maxLandingG: ${LandingDataRecorder.landingG}',
+            );
+          }
 
           return {
             'airspeed': airspeed,
@@ -161,10 +223,18 @@ class FlightSimComm {
             'zuluHour': zuluHour,
             'zuluMinute': zuluMinute,
             'zuluSecond': zuluSecond,
+            'isOnGround': isOnGround,
+            'eng1On': eng1On,
+            'eng2On': eng2On,
+            'eng3On': eng3On,
+            'eng4On': eng4On,
+            'isEngOn': isEngOn,
+            'landingVS': LandingDataRecorder.landingVS,
+            'landingG': LandingDataRecorder.landingG,
           };
         } else {
           throw Exception(
-            'Failed to get flight data.Cannot connect to the game.',
+            'Failed to get flight data. Disconnect from the game.',
           );
         }
       }
@@ -190,7 +260,9 @@ void showConnectionError(BuildContext context, e, VoidCallback? onRetry) async {
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: 10,
         children: [
-          Text('There is an error occurred while connection to the game.'),
+          Text(
+            'There is an error occurred while get data and send to the server.',
+          ),
           Container(
             decoration: BoxDecoration(
               color: FluentTheme.of(
@@ -221,4 +293,94 @@ void showConnectionError(BuildContext context, e, VoidCallback? onRetry) async {
       ],
     ),
   );
+}
+
+class LandingDataRecorder {
+  final String flightSimUrl = 'http://localhost:8000';
+  Timer? _timer;
+  bool _isStarted = false;
+  BuildContext? context;
+
+  static int landingVS = 1;
+  static double landingG = 1;
+
+  Future start(
+    BuildContext context, {
+    VoidCallback? onError,
+    VoidCallback? onRetry,
+  }) async {
+    if (!_isStarted) {
+      _isStarted = true;
+      _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) async {
+        try {
+          final response = await post(
+            Uri.parse('$flightSimUrl/api/uipc'),
+            body: jsonEncode({
+              "requestId": "1",
+              "apiVersion": "1.0",
+              "dataQueries": [
+                {
+                  "name": "Landing V/S (mps)",
+                  "offset": "0x030C",
+                  "size": 4,
+                  "targetType": "int32",
+                },
+                {
+                  "name": "Landing G (*624)",
+                  "offset": "0x11B8",
+                  "size": 2,
+                  "targetType": "int16",
+                },
+                {
+                  "name": "Aircraft on ground flag",
+                  "offset": "0x0366",
+                  "size": 2,
+                  "targetType": "int16",
+                },
+              ],
+            }),
+          );
+          if (response.statusCode == 200) {
+            final responseBody = jsonDecode(response.body);
+            final responseData = responseBody['dataResults'];
+            final isOnGround = (responseData[2]['convertedValue']) ?? 0;
+            if (isOnGround == 1) {
+              final landingVSNew =
+                  (((responseData[0]['convertedValue']) ?? 0) *
+                          (60 * 3.28084 / 256))
+                      .toInt();
+              final landingGNew = double.parse(
+                ((responseData[1]['convertedValue'] ?? 0.0) / 624)
+                    .toStringAsFixed(2),
+              );
+              if (landingVSNew < landingVS) {
+                landingVS = landingVSNew;
+                print('landingVS: $landingVS');
+              }
+              if (landingGNew > landingG) {
+                landingG = landingGNew;
+                print('landingG: $landingG');
+              }
+            }
+          }
+        } catch (e) {
+          stop();
+          if (kDebugMode) {
+            print(e);
+          }
+          if (context.mounted) {
+            onError?.call();
+            showConnectionError(context, e, onRetry);
+          }
+        }
+      });
+    }
+  }
+
+  void stop() {
+    if (_isStarted) {
+      _isStarted = false;
+      _timer?.cancel();
+    }
+  }
 }
