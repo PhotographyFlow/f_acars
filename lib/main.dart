@@ -16,6 +16,7 @@ Future<void> main() async {
   await windowManager.ensureInitialized();
 
   WindowOptions windowOptions = WindowOptions(
+    title: "F-ACARS",
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.normal,
     minimumSize: Size(588, 450),

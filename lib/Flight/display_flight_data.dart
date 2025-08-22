@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:f_acars/flight_sim_comm.dart';
-// import 'package:f_acars/web_comm.dart';
+import 'package:f_acars/web_comm.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -21,10 +21,6 @@ class FlightData {
   int zuluMinute;
   int zuluSecond;
   bool isOnGround;
-  int eng1On;
-  int eng2On;
-  int eng3On;
-  int eng4On;
   bool isEngOn;
   int landingVS;
   double landingG;
@@ -46,10 +42,6 @@ class FlightData {
     required this.zuluMinute,
     required this.zuluSecond,
     required this.isOnGround,
-    required this.eng1On,
-    required this.eng2On,
-    required this.eng3On,
-    required this.eng4On,
     required this.isEngOn,
     required this.landingVS,
     required this.landingG,
@@ -62,6 +54,7 @@ class FlightDataDisplay extends StatefulWidget {
   final String apiKey;
   final String pirepID;
   final int connectionType;
+  static int webUploadDelay = 1;
 
   const FlightDataDisplay({
     super.key,
@@ -96,10 +89,6 @@ class FlightDataDisplayState extends State<FlightDataDisplay> {
       zuluMinute: 0,
       zuluSecond: 0,
       isOnGround: false,
-      eng1On: 0,
-      eng2On: 0,
-      eng3On: 0,
-      eng4On: 0,
       isEngOn: false,
       landingVS: 0,
       landingG: 0.0,
@@ -111,6 +100,7 @@ class FlightDataDisplayState extends State<FlightDataDisplay> {
   @override
   void initState() {
     super.initState();
+    statusAutoUpdate = true;
     startTimer();
   }
 
@@ -175,8 +165,42 @@ class FlightDataDisplayState extends State<FlightDataDisplay> {
     }
   }
 
+  static void resetWebUploadDelay() {
+    /*Read data from game every 3 sec, so if you want to upload data to web, for example,every 5 min = 5*60/3 = 100 */
+    if (FlightStatusUpdate.currentStatus == FlightStatus.INI) {
+      FlightDataDisplay.webUploadDelay = 200;
+    }
+    if (FlightStatusUpdate.currentStatus == FlightStatus.BST) {
+      FlightDataDisplay.webUploadDelay = 100;
+    }
+    if (FlightStatusUpdate.currentStatus == FlightStatus.TXI) {
+      FlightDataDisplay.webUploadDelay = 2;
+    }
+    if (FlightStatusUpdate.currentStatus == FlightStatus.TOF) {
+      FlightDataDisplay.webUploadDelay = 2;
+    }
+    if (FlightStatusUpdate.currentStatus == FlightStatus.ICL) {
+      FlightDataDisplay.webUploadDelay = 5;
+    }
+    if (FlightStatusUpdate.currentStatus == FlightStatus.ENR) {
+      FlightDataDisplay.webUploadDelay = 100;
+    }
+    if (FlightStatusUpdate.currentStatus == FlightStatus.TEN) {
+      FlightDataDisplay.webUploadDelay = 10;
+    }
+    if (FlightStatusUpdate.currentStatus == FlightStatus.LDG) {
+      FlightDataDisplay.webUploadDelay = 5;
+    }
+    if (FlightStatusUpdate.currentStatus == FlightStatus.LAN) {
+      FlightDataDisplay.webUploadDelay = 2;
+    }
+    if (FlightStatusUpdate.currentStatus == FlightStatus.ARR) {
+      FlightDataDisplay.webUploadDelay = 100;
+    }
+  }
+
   void startTimer() {
-    // WebComm webComm = WebComm();
+    WebComm webComm = WebComm();
     startConnector();
     _timer = Timer.periodic(Duration(seconds: 3), (timer) {
       if (!_isFetchingData) {
@@ -201,10 +225,6 @@ class FlightDataDisplayState extends State<FlightDataDisplay> {
                   zuluMinute: data['zuluMinute'] ?? 0,
                   zuluSecond: data['zuluSecond'] ?? 0,
                   isOnGround: data['isOnGround'] ?? false,
-                  eng1On: data['eng1On'] ?? 0,
-                  eng2On: data['eng2On'] ?? 0,
-                  eng3On: data['eng3On'] ?? 0,
-                  eng4On: data['eng4On'] ?? 0,
                   isEngOn: data['isEngOn'] ?? false,
                   landingVS: data['landingVS'] ?? 0,
                   landingG: data['landingG'] ?? 0.0,
@@ -213,36 +233,40 @@ class FlightDataDisplayState extends State<FlightDataDisplay> {
               }
               _isFetchingData = false;
             });
-
-        /*
-        webComm
-            .updatePosition(
-              widget.vaUrl,
-              widget.apiKey,
-              widget.pirepID,
-              _flightDataNotifier.value.gpsLat,
-              _flightDataNotifier.value.gpsLon,
-              _flightDataNotifier.value.altCalibrated,
-              _flightDataNotifier.value.groundSpeed,
-              _flightDataNotifier.value.trueHeading,
-              _flightDataNotifier.value.totalFuel,
-              _flightDataNotifier.value.zuluYear,
-              _flightDataNotifier.value.zuluMonth,
-              _flightDataNotifier.value.zuluDay,
-              _flightDataNotifier.value.zuluHour,
-              _flightDataNotifier.value.zuluMinute,
-              _flightDataNotifier.value.zuluSecond,
-              context,
-            )
-            .then((result) {
-              if (result is Exception) {
-                if (kDebugMode) {
-                  print('Error updating position: ${result}');
+        if (FlightDataDisplay.webUploadDelay > 1) {
+          FlightDataDisplay.webUploadDelay =
+              FlightDataDisplay.webUploadDelay - 1;
+        } else {
+          resetWebUploadDelay();
+          webComm
+              .updatePosition(
+                widget.vaUrl,
+                widget.apiKey,
+                widget.pirepID,
+                _flightDataNotifier.value.gpsLat,
+                _flightDataNotifier.value.gpsLon,
+                _flightDataNotifier.value.altCalibrated,
+                _flightDataNotifier.value.groundSpeed,
+                _flightDataNotifier.value.trueHeading,
+                _flightDataNotifier.value.totalFuel,
+                _flightDataNotifier.value.zuluYear,
+                _flightDataNotifier.value.zuluMonth,
+                _flightDataNotifier.value.zuluDay,
+                _flightDataNotifier.value.zuluHour,
+                _flightDataNotifier.value.zuluMinute,
+                _flightDataNotifier.value.zuluSecond,
+                context,
+              )
+              .then((result) {
+                if (result is Exception) {
+                  if (kDebugMode) {
+                    print('Error updating position: $result');
+                  }
+                  stopTimer();
+                  showConnectionError(context, result, startTimer);
                 }
-                stopTimer();
-                showConnectionError(context, result, startTimer);
-              }
-            }); */
+              });
+        }
       }
     });
   }
@@ -255,6 +279,8 @@ class FlightDataDisplayState extends State<FlightDataDisplay> {
 
   //
   //
+  //
+  //
   // UI
   @override
   Widget build(BuildContext context) {
@@ -262,6 +288,7 @@ class FlightDataDisplayState extends State<FlightDataDisplay> {
       spacing: 15,
       children: [
         FlightDataText(flightDataNotifier: _flightDataNotifier),
+
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 10,
@@ -327,7 +354,8 @@ class FlightDataText extends StatelessWidget {
         return Column(
           children: [
             Text(
-              'Airspeed: ${flightData.airspeed} knots \nGround speed: ${flightData.groundSpeed} knots \nCalibrated altitude: ${flightData.altCalibrated} ft \nRadio altitude: ${flightData.radioAltitude} ft \nGPS Lat: ${flightData.gpsLat}° \nGPS Lon: ${flightData.gpsLon}° \nTotal fuel: ${flightData.totalFuel} lbs \nTrue heading: ${flightData.trueHeading}° \nSim zulu time: ${flightData.zuluYear}-${flightData.zuluMonth}-${flightData.zuluDay}   ${flightData.zuluHour}:${flightData.zuluMinute}:${flightData.zuluSecond} \nIs on ground: ${flightData.isOnGround == true ? 'True' : 'False'} \nEng1 On: ${flightData.eng1On == 1 ? 'True' : 'False'} \nEng2 On: ${flightData.eng2On == 1 ? 'True' : 'False'} \nEng3 On: ${flightData.eng3On == 1 ? 'True' : 'False'} \nEng4 On: ${flightData.eng4On == 1 ? 'True' : 'False'}\nIs at least one engine on: ${flightData.isEngOn == true ? 'True' : 'False'}\nlandingVS: ${flightData.landingVS} \nlandingG: ${flightData.landingG}\nflight status: ${flightData.flightStatus}',
+              'Airspeed: ${flightData.airspeed} kts \nGround speed: ${flightData.groundSpeed} kts \nCalibrated altitude: ${flightData.altCalibrated} ft \nRadio altitude: ${flightData.radioAltitude} ft \nLat: ${flightData.gpsLat}° \nLon: ${flightData.gpsLon}° \nTotal fuel: ${flightData.totalFuel} lbs \nTrue heading: ${flightData.trueHeading}° \nSim zulu time: ${flightData.zuluYear}-${flightData.zuluMonth}-${flightData.zuluDay}   ${flightData.zuluHour}:${flightData.zuluMinute}:${flightData.zuluSecond} \nOn ground: ${flightData.isOnGround == true ? 'True' : 'False'} \nEngine running: ${flightData.isEngOn == true ? 'True' : 'False'}\nLandingVS: ${flightData.landingVS} fpm\nLandingG: ${flightData.landingG} g\n\nflight status: ${flightData.flightStatus}\nWeb upload delay: ${FlightDataDisplay.webUploadDelay}',
+              style: const TextStyle(fontSize: 15, height: 1.7),
             ),
           ],
         );

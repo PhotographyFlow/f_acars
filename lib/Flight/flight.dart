@@ -2,7 +2,6 @@ import 'package:f_acars/main.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:f_acars/l10n/app_localizations.dart';
 import 'package:f_acars/Flight/display_flight_data.dart';
-import 'package:f_acars/flight_sim_comm.dart';
 
 class FlightPage extends StatelessWidget {
   final String flightID;

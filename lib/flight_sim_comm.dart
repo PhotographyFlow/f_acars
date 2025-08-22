@@ -194,8 +194,9 @@ class FlightSimComm {
               );
             }
           }
-          if (radioAltitude > 200 ||
-              FlightStatusUpdate.currentStatus != FlightStatus.LDG) {
+          if ((radioAltitude > 200 ||
+                  FlightStatusUpdate.currentStatus != FlightStatus.LDG) &&
+              LandingDataRecorder.isStarted) {
             LandingDataRecorder.stopTimer();
           }
 
@@ -224,10 +225,6 @@ class FlightSimComm {
             'zuluMinute': zuluMinute,
             'zuluSecond': zuluSecond,
             'isOnGround': isOnGround,
-            'eng1On': eng1On,
-            'eng2On': eng2On,
-            'eng3On': eng3On,
-            'eng4On': eng4On,
             'isEngOn': isEngOn,
             'landingVS': LandingDataRecorder.landingVS,
             'landingG': LandingDataRecorder.landingG,
@@ -410,48 +407,58 @@ class FlightStatusUpdate {
     switch (currentStatus) {
       case FlightStatus.INI:
         currentStatus = FlightStatus.BST;
+        FlightDataDisplayState.resetWebUploadDelay();
         break;
       case FlightStatus.BST:
         if (isEngOn && gs > 5) {
           currentStatus = FlightStatus.TXI;
+          FlightDataDisplayState.resetWebUploadDelay();
         }
         break;
       case FlightStatus.TXI:
         if (gs > 45 && onGround) {
           currentStatus = FlightStatus.TOF;
+          FlightDataDisplayState.resetWebUploadDelay();
         }
         break;
       case FlightStatus.TOF:
         if (!onGround && gs > 60) {
           currentStatus = FlightStatus.ICL;
+          FlightDataDisplayState.resetWebUploadDelay();
         }
         break;
       case FlightStatus.ICL:
         if (ra > 5000) {
           currentStatus = FlightStatus.ENR;
+          FlightDataDisplayState.resetWebUploadDelay();
         }
         break;
       case FlightStatus.ENR:
         if (ra < 4000) {
           currentStatus = FlightStatus.TEN;
+          FlightDataDisplayState.resetWebUploadDelay();
         }
         break;
       case FlightStatus.TEN:
         if (ra < 2500) {
           currentStatus = FlightStatus.LDG;
+          FlightDataDisplayState.resetWebUploadDelay();
         }
         break;
       case FlightStatus.LDG:
         if (onGround && gs < 60) {
           currentStatus = FlightStatus.LAN;
+          FlightDataDisplayState.resetWebUploadDelay();
         }
         break;
       case FlightStatus.LAN:
         if (!isEngOn && gs == 0) {
           currentStatus = FlightStatus.ARR;
+          FlightDataDisplayState.resetWebUploadDelay();
         }
         if ((!onGround && gs > 60) || ra > 200) {
           currentStatus = FlightStatus.LDG;
+          FlightDataDisplayState.resetWebUploadDelay();
           LandingDataRecorder.landingVS = 0;
           LandingDataRecorder.landingG = 0.0;
         }
