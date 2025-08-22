@@ -34,11 +34,15 @@ A simple, free ACARS for phpVMS, powered by <a href="https://flutter.dev">Flutte
   - Landing data (Landing VS, Landing G)
   - Flight status (auto/manual)
 
-- Internationalization supported (currently include English and simplified Chinese, and is easy to add using flutter_localizations)
+- Internationalization supported (currently include English and simplified Chinese, and it's easy to add using flutter_localizations)
   
+---
+
 ### Problems:
 - High RAM usage (normally using 100-300mb)
 - Not compatible with x32 systems
 - Can't calculate the flight scores based on rules ~~(too lazy to make it compatible with all aircrafts :sweat: )~~
 
+
+Work in progress...
 
