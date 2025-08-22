@@ -1,7 +1,9 @@
 import 'package:f_acars/main.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:f_acars/l10n/app_localizations.dart';
+import 'package:f_acars/Flight/display_flight_data.dart';
 
-class FlightPage extends StatefulWidget {
+class FlightPage extends StatelessWidget {
   final String flightID;
   final String airlineIcao;
   final String airlineIata;
@@ -10,8 +12,14 @@ class FlightPage extends StatefulWidget {
   final String arrAirport;
   final int blockFuel;
   final int weightUnit;
+  final int connectionType;
   final String route;
   final List<dynamic> fares;
+  final String apiKey;
+  final String vaUrl;
+
+  final int buildNumber;
+
   const FlightPage({
     super.key,
     required this.flightID,
@@ -22,28 +30,33 @@ class FlightPage extends StatefulWidget {
     required this.arrAirport,
     required this.blockFuel,
     required this.weightUnit,
+    required this.connectionType,
     required this.route,
     required this.fares,
+    required this.apiKey,
+    required this.vaUrl,
+
+    required this.buildNumber,
   });
 
   @override
-  State<FlightPage> createState() => _FlightPageState();
-}
-
-class _FlightPageState extends State<FlightPage> {
-  @override
   Widget build(BuildContext context) {
     return FluentTheme(
-      data: FluentThemeData(
-        micaBackgroundColor: Colors.transparent,
-        brightness: Brightness.dark,
-        accentColor: Colors.blue,
-        scaffoldBackgroundColor: Colors.transparent,
-      ),
+      data: buildNumber >= 22000
+          ? FluentThemeData(
+              micaBackgroundColor: Colors.transparent,
+              brightness: Brightness.dark,
+              accentColor: Colors.blue,
+              scaffoldBackgroundColor: Colors.transparent,
+            )
+          : FluentThemeData(
+              brightness: Brightness.dark,
+              accentColor: Colors.blue,
+            ),
       child: ScaffoldPage.scrollable(
         header: PageHeader(
           title: Text(
-            '${widget.airlineIcao} / ${widget.airlineIata} ${widget.flightNumber}',
+            '$airlineIcao / $airlineIata $flightNumber',
             style: FluentTheme.of(context).typography.titleLarge,
           ),
         ),
@@ -55,7 +68,10 @@ class _FlightPageState extends State<FlightPage> {
               child: Button(
                 child: Row(
                   spacing: 7,
-                  children: [Text('Quit'), Icon(FluentIcons.clear)],
+                  children: [
+                    Text(AppLocalizations.of(context)!.quit),
+                    Icon(FluentIcons.clear),
+                  ],
                 ),
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
@@ -99,14 +115,14 @@ class _FlightPageState extends State<FlightPage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  widget.depAirport,
+                                  depAirport,
                                   style: FluentTheme.of(
                                     context,
                                   ).typography.title,
                                 ),
                                 Icon(FluentIcons.airplane, size: 20.0),
                                 Text(
-                                  widget.arrAirport,
+                                  arrAirport,
                                   style: FluentTheme.of(
                                     context,
                                   ).typography.title,
@@ -116,14 +132,14 @@ class _FlightPageState extends State<FlightPage> {
 
                             //show block fuel
                             Text(
-                              'Block fuel:  ${widget.blockFuel}  ${widget.weightUnit == 1 ? 'kg' : 'lbs'}',
+                              '${AppLocalizations.of(context)!.blockFuel}  $blockFuel  ${weightUnit == 1 ? 'kg' : 'lbs'}',
                               style: FluentTheme.of(
                                 context,
                               ).typography.subtitle,
                             ),
 
                             Text(
-                              'Fares:',
+                              AppLocalizations.of(context)!.fares,
                               style: FluentTheme.of(
                                 context,
                               ).typography.subtitle,
@@ -156,7 +172,9 @@ class _FlightPageState extends State<FlightPage> {
                                     Container(
                                       padding: EdgeInsets.all(7.0),
                                       child: Text(
-                                        'Name',
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.aircraftName, //just use name, same
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -165,7 +183,7 @@ class _FlightPageState extends State<FlightPage> {
                                     Container(
                                       padding: EdgeInsets.all(7.0),
                                       child: Text(
-                                        'Code',
+                                        AppLocalizations.of(context)!.code,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -174,7 +192,7 @@ class _FlightPageState extends State<FlightPage> {
                                     Container(
                                       padding: EdgeInsets.all(7.0),
                                       child: Text(
-                                        'Count',
+                                        AppLocalizations.of(context)!.count,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -182,7 +200,7 @@ class _FlightPageState extends State<FlightPage> {
                                     ),
                                   ],
                                 ),
-                                ...widget.fares.map((fare) {
+                                ...fares.map((fare) {
                                   return TableRow(
                                     children: [
                                       Container(
@@ -199,12 +217,12 @@ class _FlightPageState extends State<FlightPage> {
                                       ),
                                     ],
                                   );
-                                }).toList(),
+                                }),
                               ],
                             ),
 
                             Text(
-                              'Route:',
+                              AppLocalizations.of(context)!.route,
                               style: FluentTheme.of(
                                 context,
                               ).typography.subtitle,
@@ -233,36 +251,32 @@ class _FlightPageState extends State<FlightPage> {
                                     padding: EdgeInsets.all(5.0),
                                     child:
                                         //highlight airways, assume airways are contain numbers
-                                        //I think this is the best way so far :(
-                                        //Anyone have better way?
                                         Center(
                                           child: Text.rich(
                                             TextSpan(
-                                              children: widget.route
-                                                  .split(' ')
-                                                  .map((part) {
-                                                    if (part.contains(
-                                                      RegExp(r'\d'),
-                                                    )) {
-                                                      return TextSpan(
-                                                        text: '$part ',
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 15.0,
-                                                        ),
-                                                      );
-                                                    } else {
-                                                      return TextSpan(
-                                                        text: '$part ',
-                                                        style: TextStyle(
-                                                          color:
-                                                              Colors.grey[100],
-                                                          fontSize: 15.0,
-                                                        ),
-                                                      );
-                                                    }
-                                                  })
-                                                  .toList(),
+                                              children: route.split(' ').map((
+                                                part,
+                                              ) {
+                                                if (part.contains(
+                                                  RegExp(r'\d'),
+                                                )) {
+                                                  return TextSpan(
+                                                    text: '$part ',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 15.0,
+                                                    ),
+                                                  );
+                                                } else {
+                                                  return TextSpan(
+                                                    text: '$part ',
+                                                    style: TextStyle(
+                                                      color: Colors.grey[100],
+                                                      fontSize: 15.0,
+                                                    ),
+                                                  );
+                                                }
+                                              }).toList(),
                                             ),
                                           ),
                                         ),
@@ -277,7 +291,21 @@ class _FlightPageState extends State<FlightPage> {
                   ),
                 ),
 
-                Expanded(child: Column(children: [Text('Airspeed:N/A')])),
+                //
+                //
+                //display flight data
+                Expanded(
+                  child: Column(
+                    children: [
+                      FlightDataDisplay(
+                        vaUrl: vaUrl,
+                        apiKey: apiKey,
+                        pirepID: flightID,
+                        connectionType: connectionType,
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

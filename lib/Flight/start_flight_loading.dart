@@ -1,6 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'flight.dart';
 import 'package:f_acars/web_comm.dart';
+import 'package:f_acars/l10n/app_localizations.dart';
+import 'package:f_acars/flight_sim_comm.dart';
 
 class FlightLoadingPage extends StatelessWidget {
   final TextEditingController vaUrlController;
@@ -20,6 +22,9 @@ class FlightLoadingPage extends StatelessWidget {
   final int plannedFlightTime;
 
   final int weightUnit;
+  final int connectionType;
+
+  final int buildNumber;
 
   const FlightLoadingPage({
     super.key,
@@ -40,6 +45,9 @@ class FlightLoadingPage extends StatelessWidget {
     required this.plannedFlightTime,
 
     required this.weightUnit,
+    required this.connectionType,
+
+    required this.buildNumber,
   });
 
   @override
@@ -67,6 +75,7 @@ class FlightLoadingPage extends StatelessWidget {
           fares,
         )
         .then((result) {
+          FlightStatusUpdate.currentStatus = FlightStatus.INI;
           String flightID = result?['id'] ?? 'null';
           if (flightID != 'null') {
             Navigator.pushAndRemoveUntil(
@@ -81,21 +90,46 @@ class FlightLoadingPage extends StatelessWidget {
                   arrAirport: arrAirport,
                   blockFuel: blockFuel,
                   weightUnit: weightUnit,
+                  connectionType: connectionType,
                   route: route,
                   fares: fares,
+                  vaUrl: vaUrlController.text,
+                  apiKey: apiKeyController.text,
+                  buildNumber: buildNumber,
                 ),
               ),
               (route) => false,
             );
           }
         });
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 20,
-      children: [
-        SizedBox(height: 50, width: 50, child: ProgressRing()),
-        Text('Prefiling pirep, please wait...'),
-      ],
+    return FluentTheme(
+      data: buildNumber >= 22000
+          ? FluentThemeData(
+              micaBackgroundColor: Colors.transparent,
+              brightness: Brightness.dark,
+              accentColor: Colors.blue,
+              scaffoldBackgroundColor: Colors.transparent,
+            )
+          : FluentThemeData(
+              brightness: Brightness.dark,
+              accentColor: Colors.blue,
+            ),
+      child: ScaffoldPage(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 20,
+              children: [
+                SizedBox(height: 50, width: 50, child: ProgressRing()),
+                Text(AppLocalizations.of(context)!.prefiling),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -66,5 +66,83 @@ class AppLocalizationsZh extends AppLocalizations {
   String get language => '语言';
 
   @override
+  String get connectionType => '连接方式';
+
+  @override
+  String get connectionTypeTip => 'x64: 适用于64位模拟器 (如 P3Dv4+, MSFS)\nx32: 适用于32位模拟器 (如 P3Dv1-3, FSX)\n请确保fsuipc已安装';
+
+  @override
   String get weightUnit => '重量单位';
+
+  @override
+  String get clear => '清除';
+
+  @override
+  String get refresh => '刷新';
+
+  @override
+  String get startFlight => '开始飞行';
+
+  @override
+  String get airline => '航空公司';
+
+  @override
+  String get flightNumber => '航班号';
+
+  @override
+  String get dep => '起飞机场';
+
+  @override
+  String get arr => '落地机场';
+
+  @override
+  String get aircraftType => '飞机型号';
+
+  @override
+  String get aircraftIcaoCode => '飞机ICAO代码';
+
+  @override
+  String get aircraftName => '名字';
+
+  @override
+  String get registration => '注册号';
+
+  @override
+  String get blockFuel => '轮挡油量';
+
+  @override
+  String get noFares => '无配载数据';
+
+  @override
+  String get route => '航路';
+
+  @override
+  String get prefiling => '上传航班计划中, 请坐和放宽...';
+
+  @override
+  String get prefilingError => '上传航班计划时发生错误，请检查您的设置和网络连接。';
+
+  @override
+  String get error => '错误';
+
+  @override
+  String get noBidsFoundTitle => '找不到航班 :(';
+
+  @override
+  String get noBidsFound => '找不到任何航班，检查您的设置和网络连接，或在 VA 网站预定一个航班。';
+
+  @override
+  String get back => '返回';
+
+  @override
+  String get quit => '退出';
+
+  @override
+  String get fares => '配载';
+
+  @override
+  String get code => '代码';
+
+  @override
+  String get count => '数量';
 }

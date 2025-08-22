@@ -109,7 +109,7 @@ class WebComm {
           context,
           builder: (context, close) {
             return InfoBar(
-              title: const Text('Error'),
+              title: Text(AppLocalizations.of(context)!.error),
               content: Text(AppLocalizations.of(context)!.e401),
               action: IconButton(
                 icon: const Icon(FluentIcons.clear),
@@ -125,7 +125,7 @@ class WebComm {
           context,
           builder: (context, close) {
             return InfoBar(
-              title: const Text('Error'),
+              title: Text(AppLocalizations.of(context)!.error),
               content: Text(AppLocalizations.of(context)!.e404),
               action: IconButton(
                 icon: const Icon(FluentIcons.clear),
@@ -141,7 +141,7 @@ class WebComm {
           context,
           builder: (context, close) {
             return InfoBar(
-              title: const Text('Error'),
+              title: Text(AppLocalizations.of(context)!.error),
               content: Text(AppLocalizations.of(context)!.e400),
               action: IconButton(
                 icon: const Icon(FluentIcons.clear),
@@ -157,10 +157,8 @@ class WebComm {
         context,
         builder: (context, close) {
           return InfoBar(
-            title: const Text('No bids found :('),
-            content: const Text(
-              'Couldn\'t find any bids. Check your settings and internet connection or add one bid at your VA website.',
-            ),
+            title: Text(AppLocalizations.of(context)!.noBidsFoundTitle),
+            content: Text(AppLocalizations.of(context)!.noBidsFound),
             action: IconButton(
               icon: const Icon(FluentIcons.clear),
               onPressed: close,
@@ -226,7 +224,7 @@ class WebComm {
             responseData.containsKey('aircraft_id')) {
           return responseData;
         } else {
-          throw Exception('Prefiling failed');
+          throw Exception('Prefiling failed, no required data keys.');
         }
       }
     } catch (e) {
@@ -243,21 +241,68 @@ class WebComm {
       showPrefileError(context, e);
     }
   }
+
+  Future updatePosition(
+    String vaUrlController,
+    String apiKeyController,
+    String pirepID,
+    double gpsLat,
+    double gpsLon,
+    int altCalibrated,
+    int groundSpeed,
+    int trueHeading,
+    int totalFuel,
+    int zuluYear,
+    int zuluMonth,
+    int zuluDay,
+    int zuluHour,
+    int zuluMinute,
+    int zuluSecond,
+    BuildContext context,
+  ) async {
+    try {
+      final response = await post(
+        Uri.parse('$vaUrlController/api/pireps/$pirepID/acars/position'),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKeyController,
+        },
+        body: jsonEncode({
+          "positions": [
+            {
+              "lat": gpsLat,
+              "lon": gpsLon,
+              "altitude": altCalibrated,
+              "gs": groundSpeed,
+              "heading": trueHeading,
+              "fuel": totalFuel,
+              "sim_time":
+                  "$zuluYear-$zuluMonth-$zuluDay T$zuluHour:$zuluMinute:$zuluSecond Z",
+            },
+          ],
+        }),
+      );
+      if (kDebugMode) {
+        print('Position updated');
+        print(response.body);
+      }
+    } catch (e) {
+      return e;
+    }
+  }
 }
 
 void showPrefileError(BuildContext context, e) async {
   await showDialog<String>(
     context: context,
     builder: (context) => ContentDialog(
-      title: const Text('Prefiling error!'),
+      title: Text(AppLocalizations.of(context)!.error),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: 10,
         children: [
-          Text(
-            'There is an error occurred while prefiling. Please check your settings and internet connection.',
-          ),
+          Text(AppLocalizations.of(context)!.prefilingError),
           Container(
             decoration: BoxDecoration(
               color: FluentTheme.of(
@@ -279,7 +324,7 @@ void showPrefileError(BuildContext context, e) async {
       ),
       actions: [
         Button(
-          child: const Text('Back'),
+          child: Text(AppLocalizations.of(context)!.back),
           onPressed: () {
             Navigator.pop(context);
             Navigator.pop(context);
