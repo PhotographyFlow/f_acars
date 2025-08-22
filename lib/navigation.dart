@@ -5,7 +5,12 @@ import 'package:f_acars/l10n/app_localizations.dart';
 
 class Navigation extends StatefulWidget {
   final Function(Locale) onLocaleChanged;
-  const Navigation({super.key, required this.onLocaleChanged});
+  final int buildNumber;
+  const Navigation({
+    super.key,
+    required this.onLocaleChanged,
+    required this.buildNumber,
+  });
   @override
   State<Navigation> createState() => _NavigationState();
 }
@@ -37,7 +42,7 @@ class _NavigationState extends State<Navigation> {
         items: [
           PaneItem(
             icon: Icon(FluentIcons.home),
-            body: HomePage(),
+            body: HomePage(buildNumber: widget.buildNumber),
             title: Text(AppLocalizations.of(context)!.home),
           ),
           PaneItem(

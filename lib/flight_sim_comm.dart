@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'package:f_acars/Flight/display_flight_data.dart';
 
 class FlightSimComm {
   final String flightSimUrl = 'http://localhost:8000';
@@ -134,18 +135,6 @@ class FlightSimComm {
               "size": 2,
               "targetType": "int16",
             },
-            {
-              "name": "Landing V/S (mps)",
-              "offset": "0x030C",
-              "size": 4,
-              "targetType": "int32",
-            },
-            {
-              "name": "Landing G (*624)",
-              "offset": "0x11B8",
-              "size": 2,
-              "targetType": "int16",
-            },
           ],
         }),
       );
@@ -190,26 +179,34 @@ class FlightSimComm {
           final eng4On = (responseData[18]['convertedValue']) ?? 0;
           final bool isEngOn =
               eng1On == 1 || eng2On == 1 || eng3On == 1 || eng4On == 1;
-          /*
-          if (radioAltitude < 200 && context.mounted) {
-            recorder.start(context);
+
+          if (radioAltitude < 200 &&
+              !LandingDataRecorder.isStarted &&
+              FlightStatusUpdate.currentStatus == FlightStatus.LDG &&
+              context.mounted) {
+            if (kDebugMode) {
+              print('Try to start');
+            }
+            LandingDataRecorder.startTimer(context);
+            if (kDebugMode) {
+              print(
+                'maxLandingVS: ${LandingDataRecorder.landingVS}, maxLandingG: ${LandingDataRecorder.landingG}',
+              );
+            }
           }
-          if (radioAltitude > 200) {
-            recorder.stop();
+          if (radioAltitude > 200 ||
+              FlightStatusUpdate.currentStatus != FlightStatus.LDG) {
+            LandingDataRecorder.stopTimer();
           }
-          if (kDebugMode) {
-            print(
-              'maxLandingVS: ${LandingDataRecorder.landingVS}, maxLandingG: ${LandingDataRecorder.landingG}',
+
+          if (FlightDataDisplayState.statusAutoUpdate) {
+            FlightStatusUpdate.updateStatus(
+              groundSpeed,
+              radioAltitude,
+              isEngOn,
+              isOnGround,
             );
           }
-*/
-
-          FlightStatusUpdate.updateStatus(
-            groundSpeed,
-            radioAltitude,
-            isEngOn,
-            isOnGround,
-          );
 
           return {
             'airspeed': airspeed,
@@ -232,12 +229,23 @@ class FlightSimComm {
             'eng3On': eng3On,
             'eng4On': eng4On,
             'isEngOn': isEngOn,
-            'landingVS': 0, // LandingDataRecorder.landingVS,
-            'landingG': 0.0, // LandingDataRecorder.landingG,
-            'flightStatus': (FlightStatusUpdate.currentStatus)
-                .toString()
-                .split('.')
-                .last,
+            'landingVS': LandingDataRecorder.landingVS,
+            'landingG': LandingDataRecorder.landingG,
+            'flightStatus':
+                {
+                  FlightStatus.INI: 'Initiated',
+                  FlightStatus.BST: 'Boarding',
+                  FlightStatus.TXI: 'Taxi',
+                  FlightStatus.TOF: 'Takeoff',
+                  FlightStatus.ICL: 'Initial Climb',
+                  FlightStatus.ENR: 'Enroute',
+                  FlightStatus.TEN: 'Approach',
+                  FlightStatus.LDG: 'Landing',
+                  FlightStatus.LAN: 'Landed',
+                  FlightStatus.ARR: 'Arrived',
+                  FlightStatus.PSD: 'Paused',
+                }[FlightStatusUpdate.currentStatus] ??
+                'Unknown Status',
           };
         } else {
           throw Exception(
@@ -257,100 +265,127 @@ class FlightSimComm {
   }
 }
 
+//
+//
+//
+//
+//
 class LandingDataRecorder {
-  final String flightSimUrl = 'http://localhost:8000';
-  Timer? _timer;
-  bool _isStarted = false;
+  static final String flightSimUrl = 'http://localhost:8000';
+  static Timer? _timer;
   BuildContext? context;
+  static bool isGettingData = false;
+  static bool isTryToStop = false;
+  static bool isStarted = false;
 
-  static int landingVS = 1;
-  static double landingG = 1;
+  static int landingVS = 0;
+  static double landingG = 0.0;
 
-  Future start(
-    BuildContext context, {
-    VoidCallback? onError,
-    VoidCallback? onRetry,
-  }) async {
-    if (!_isStarted) {
-      _isStarted = true;
-      _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) async {
-        try {
-          final response = await post(
-            Uri.parse('$flightSimUrl/api/uipc'),
-            body: jsonEncode({
-              "requestId": "1",
-              "apiVersion": "1.0",
-              "dataQueries": [
-                {
-                  "name": "Landing V/S (mps)",
-                  "offset": "0x030C",
-                  "size": 4,
-                  "targetType": "int32",
-                },
-                {
-                  "name": "Landing G (*624)",
-                  "offset": "0x11B8",
-                  "size": 2,
-                  "targetType": "int16",
-                },
-                {
-                  "name": "Aircraft on ground flag",
-                  "offset": "0x0366",
-                  "size": 2,
-                  "targetType": "int16",
-                },
-              ],
-            }),
-          );
-          if (response.statusCode == 200) {
-            final responseBody = jsonDecode(response.body);
-            final responseData = responseBody['dataResults'];
-            final isOnGround = (responseData[2]['convertedValue']) ?? 0;
-            if (isOnGround == 1) {
-              final landingVSNew =
-                  (((responseData[0]['convertedValue']) ?? 0) *
-                          (60 * 3.28084 / 256))
-                      .toInt();
-              final landingGNew = double.parse(
-                ((responseData[1]['convertedValue'] ?? 0.0) / 624)
-                    .toStringAsFixed(2),
-              );
-              if (landingVSNew < landingVS) {
-                landingVS = landingVSNew;
-                if (kDebugMode) {
-                  print('landingVS: $landingVS');
-                }
-              }
-              if (landingGNew > landingG) {
-                landingG = landingGNew;
-                if (kDebugMode) {
-                  print('landingG: $landingG');
-                }
-              }
-            }
-          }
-        } catch (e) {
-          stop();
+  static void startTimer(context) {
+    isStarted = true;
+    isTryToStop = false;
+    if (isGettingData) {
+      return;
+    } else {
+      isGettingData = true;
+      _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+        if (kDebugMode) {
+          print('timer running!');
+        }
+        if (!isTryToStop) {
           if (kDebugMode) {
-            print(e);
+            print('fetching landing data...');
           }
-          if (context.mounted) {
-            onError?.call();
-            showConnectionError(context, e, onRetry);
+          try {
+            post(
+              Uri.parse('$flightSimUrl/api/uipc'),
+              body: jsonEncode({
+                "requestId": "1",
+                "apiVersion": "1.0",
+                "dataQueries": [
+                  {
+                    "name": "Landing V/S (mps)",
+                    "offset": "0x030C",
+                    "size": 4,
+                    "targetType": "int32",
+                  },
+                  {
+                    "name": "Landing G (*624)",
+                    "offset": "0x11B8",
+                    "size": 2,
+                    "targetType": "int16",
+                  },
+                  {
+                    "name": "Aircraft on ground flag",
+                    "offset": "0x0366",
+                    "size": 2,
+                    "targetType": "int16",
+                  },
+                ],
+              }),
+            ).then((response) {
+              isGettingData = false;
+              if (response.statusCode == 200) {
+                final responseBody = jsonDecode(response.body);
+                final responseData = responseBody['dataResults'];
+                final String isSucceeded = responseBody['status'] ?? 'failed';
+                if (isSucceeded == 'success') {
+                  final isOnGround =
+                      (responseData[2]['convertedValue'] ?? 0) != 0;
+                  if (isOnGround) {
+                    final landingVSNew =
+                        (((responseData[0]['convertedValue']) ?? 0) *
+                                (60 * 3.28084 / 256))
+                            .toInt();
+                    final landingGNew = double.parse(
+                      ((responseData[1]['convertedValue'] ?? 0.0) / 624)
+                          .toStringAsFixed(2),
+                    );
+                    if (landingVSNew < landingVS) {
+                      landingVS = landingVSNew;
+                      if (kDebugMode) {
+                        print('landingVS: $landingVS');
+                      }
+                    }
+                    if (landingGNew > landingG) {
+                      landingG = landingGNew;
+                      if (kDebugMode) {
+                        print('landingG: $landingG');
+                      }
+                    }
+                  }
+                }
+              }
+            });
+          } catch (e) {
+            if (kDebugMode) {
+              print(e);
+            }
+            stopTimer();
+            if (context.mounted) {
+              showConnectionError(context, e, () => startTimer(context));
+            }
           }
         }
       });
     }
   }
 
-  void stop() {
-    if (_isStarted) {
-      _isStarted = false;
-      _timer?.cancel();
+  static void stopTimer() {
+    if (kDebugMode) {
+      print('Try to stop');
     }
+    isTryToStop = true;
+    isStarted = false;
+    isGettingData = false;
+    _timer?.cancel();
+    _timer = null;
   }
 }
 
+//
+//
+//
 //
 //
 //Flight Status update
@@ -387,7 +422,7 @@ class FlightStatusUpdate {
         }
         break;
       case FlightStatus.TOF:
-        if (!onGround && gs > 80) {
+        if (!onGround && gs > 60) {
           currentStatus = FlightStatus.ICL;
         }
         break;
@@ -407,13 +442,18 @@ class FlightStatusUpdate {
         }
         break;
       case FlightStatus.LDG:
-        if (onGround && gs < 80) {
+        if (onGround && gs < 60) {
           currentStatus = FlightStatus.LAN;
         }
         break;
       case FlightStatus.LAN:
         if (!isEngOn && gs == 0) {
           currentStatus = FlightStatus.ARR;
+        }
+        if ((!onGround && gs > 60) || ra > 200) {
+          currentStatus = FlightStatus.LDG;
+          LandingDataRecorder.landingVS = 0;
+          LandingDataRecorder.landingG = 0.0;
         }
         break;
       default:
@@ -422,6 +462,9 @@ class FlightStatusUpdate {
   }
 }
 
+//
+//
+//
 //
 //
 //

@@ -23,7 +23,8 @@ class UpperCaseTextFormatter extends TextInputFormatter {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final int buildNumber;
+  const HomePage({super.key, required this.buildNumber});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -386,6 +387,7 @@ class _HomePageState extends State<HomePage> {
                                 bidID: flightID ?? '',
                                 plannedDistance: plannedDistance,
                                 plannedFlightTime: plannedFlightTime,
+                                buildNumber: widget.buildNumber,
                               );
                             },
                           ),
@@ -527,7 +529,11 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   spacing: 5.0,
                   children: [
-                    Text(AppLocalizations.of(context)!.aircraftIcaoCode),
+                    Text(
+                      AppLocalizations.of(context)!.aircraftIcaoCode,
+                      maxLines: 1,
+                      overflow: TextOverflow.visible,
+                    ),
                     TextBox(
                       enabled: false,
                       readOnly: true,
@@ -556,6 +562,7 @@ class _HomePageState extends State<HomePage> {
                       placeholderStyle: TextStyle(
                         color: Colors.grey[100],
                         fontSize: 24.0,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -576,6 +583,7 @@ class _HomePageState extends State<HomePage> {
                       placeholderStyle: TextStyle(
                         color: Colors.grey[100],
                         fontSize: 24.0,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       textAlign: TextAlign.center,
                     ),

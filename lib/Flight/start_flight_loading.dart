@@ -24,6 +24,8 @@ class FlightLoadingPage extends StatelessWidget {
   final int weightUnit;
   final int connectionType;
 
+  final int buildNumber;
+
   const FlightLoadingPage({
     super.key,
     required this.vaUrlController,
@@ -44,6 +46,8 @@ class FlightLoadingPage extends StatelessWidget {
 
     required this.weightUnit,
     required this.connectionType,
+
+    required this.buildNumber,
   });
 
   @override
@@ -91,19 +95,41 @@ class FlightLoadingPage extends StatelessWidget {
                   fares: fares,
                   vaUrl: vaUrlController.text,
                   apiKey: apiKeyController.text,
+                  buildNumber: buildNumber,
                 ),
               ),
               (route) => false,
             );
           }
         });
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 20,
-      children: [
-        SizedBox(height: 50, width: 50, child: ProgressRing()),
-        Text(AppLocalizations.of(context)!.prefiling),
-      ],
+    return FluentTheme(
+      data: buildNumber >= 22000
+          ? FluentThemeData(
+              micaBackgroundColor: Colors.transparent,
+              brightness: Brightness.dark,
+              accentColor: Colors.blue,
+              scaffoldBackgroundColor: Colors.transparent,
+            )
+          : FluentThemeData(
+              brightness: Brightness.dark,
+              accentColor: Colors.blue,
+            ),
+      child: ScaffoldPage(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 20,
+              children: [
+                SizedBox(height: 50, width: 50, child: ProgressRing()),
+                Text(AppLocalizations.of(context)!.prefiling),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -19,6 +19,8 @@ class FlightPage extends StatelessWidget {
   final String apiKey;
   final String vaUrl;
 
+  final int buildNumber;
+
   const FlightPage({
     super.key,
     required this.flightID,
@@ -34,17 +36,24 @@ class FlightPage extends StatelessWidget {
     required this.fares,
     required this.apiKey,
     required this.vaUrl,
+
+    required this.buildNumber,
   });
 
   @override
   Widget build(BuildContext context) {
     return FluentTheme(
-      data: FluentThemeData(
-        micaBackgroundColor: Colors.transparent,
-        brightness: Brightness.dark,
-        accentColor: Colors.blue,
-        scaffoldBackgroundColor: Colors.transparent,
-      ),
+      data: buildNumber >= 22000
+          ? FluentThemeData(
+              micaBackgroundColor: Colors.transparent,
+              brightness: Brightness.dark,
+              accentColor: Colors.blue,
+              scaffoldBackgroundColor: Colors.transparent,
+            )
+          : FluentThemeData(
+              brightness: Brightness.dark,
+              accentColor: Colors.blue,
+            ),
       child: ScaffoldPage.scrollable(
         header: PageHeader(
           title: Text(

@@ -76,6 +76,7 @@ class FlightDataDisplay extends StatefulWidget {
 }
 
 class FlightDataDisplayState extends State<FlightDataDisplay> {
+  static bool statusAutoUpdate = true;
   bool _isFetchingData = false;
   Timer? _timer;
   final ValueNotifier<FlightData> _flightDataNotifier = ValueNotifier(
@@ -252,6 +253,9 @@ class FlightDataDisplayState extends State<FlightDataDisplay> {
     stopConnector();
   }
 
+  //
+  //
+  // UI
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -262,15 +266,25 @@ class FlightDataDisplayState extends State<FlightDataDisplay> {
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 10,
           children: [
+            Text('Status auto update'),
+            ToggleSwitch(
+              checked: statusAutoUpdate,
+              onChanged: (v) => setState(() => statusAutoUpdate = v),
+            ),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 10,
+          children: [
             ComboBox(
               value: selectedValue,
               onChanged: (value) {
                 setState(() {
-                  selectedValue = value ?? FlightStatus.INI;
+                  selectedValue = value ?? FlightStatus.BST;
                 });
               },
               items: [
-                ComboBoxItem(value: FlightStatus.INI, child: Text('Initiated')),
                 ComboBoxItem(value: FlightStatus.BST, child: Text('Boarding')),
                 ComboBoxItem(value: FlightStatus.TXI, child: Text('Taxi')),
                 ComboBoxItem(value: FlightStatus.TOF, child: Text('Takeoff')),
@@ -313,7 +327,7 @@ class FlightDataText extends StatelessWidget {
         return Column(
           children: [
             Text(
-              'Airspeed: ${flightData.airspeed} knots \nGround speed: ${flightData.groundSpeed} knots \nCalibrated altitude: ${flightData.altCalibrated} ft \nRadio altitude: ${flightData.radioAltitude} ft \nGPS Lat: ${flightData.gpsLat}° \nGPS Lon: ${flightData.gpsLon}° \nTotal fuel: ${flightData.totalFuel} lbs \nTrue heading: ${flightData.trueHeading}° \nSim zulu time: ${flightData.zuluYear}-${flightData.zuluMonth}-${flightData.zuluDay}   ${flightData.zuluHour}:${flightData.zuluMinute}:${flightData.zuluSecond} \nIs on ground: ${flightData.isOnGround == 1 ? 'True' : 'False'} \nEng1 On: ${flightData.eng1On == 1 ? 'True' : 'False'} \nEng2 On: ${flightData.eng2On == 1 ? 'True' : 'False'} \nEng3 On: ${flightData.eng3On == 1 ? 'True' : 'False'} \nEng4 On: ${flightData.eng4On == 1 ? 'True' : 'False'}\nIs at least one engine on: ${flightData.isEngOn}\nlandingVS: ${flightData.landingVS} \nlandingG: ${flightData.landingG}\nflight status: ${flightData.flightStatus}',
+              'Airspeed: ${flightData.airspeed} knots \nGround speed: ${flightData.groundSpeed} knots \nCalibrated altitude: ${flightData.altCalibrated} ft \nRadio altitude: ${flightData.radioAltitude} ft \nGPS Lat: ${flightData.gpsLat}° \nGPS Lon: ${flightData.gpsLon}° \nTotal fuel: ${flightData.totalFuel} lbs \nTrue heading: ${flightData.trueHeading}° \nSim zulu time: ${flightData.zuluYear}-${flightData.zuluMonth}-${flightData.zuluDay}   ${flightData.zuluHour}:${flightData.zuluMinute}:${flightData.zuluSecond} \nIs on ground: ${flightData.isOnGround == true ? 'True' : 'False'} \nEng1 On: ${flightData.eng1On == 1 ? 'True' : 'False'} \nEng2 On: ${flightData.eng2On == 1 ? 'True' : 'False'} \nEng3 On: ${flightData.eng3On == 1 ? 'True' : 'False'} \nEng4 On: ${flightData.eng4On == 1 ? 'True' : 'False'}\nIs at least one engine on: ${flightData.isEngOn == true ? 'True' : 'False'}\nlandingVS: ${flightData.landingVS} \nlandingG: ${flightData.landingG}\nflight status: ${flightData.flightStatus}',
             ),
           ],
         );
